@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
+using WeddingApp_Test.Application.DTO;
 using WeddingApp_Test.Application.DTO.User;
 using WeddingApp_Test.Application.Interfaces;
 
@@ -25,4 +28,18 @@ public class UsersController(IUserService userService) : ControllerBase
 	{
 		return Ok(await userService.GetAllUsersAsync());
 	}
+	
+	[HttpPost]
+	public async Task<IActionResult> AdminLogin(LoginRequest loginRequest)
+	{
+		throw new NotImplementedException();
+	}
+	
+	[HttpPost]
+	public async Task<GuestLoginResponse> GuestLogin(GuestLoginRequest loginRequest)
+	{
+		throw new NotImplementedException();
+	}
+	
+	
 }

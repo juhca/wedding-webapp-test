@@ -15,11 +15,15 @@ public class User
 	public string LastName { get; set; } = string.Empty;
 	public string Email { get; set; } = string.Empty;
 	
+	
+	// Authentication
 	// only admins have password-based login; guest will use access codes
+	public string? AccessCode { get; set; } = string.Empty;
 	public byte[]? PasswordHash { get; set; }
 	public byte[]? PasswordSalt { get; set; }
+	public RefreshToken? RefreshToken { get; set; }
 	
-	public string? AccessCode { get; set; } = string.Empty;
+	// Authorization
 	
 	public UserRole Role { get; set; }
 	
