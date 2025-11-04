@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WeddingApp_Test.Application.Common.Interfaces;
+using WeddingApp_Test.Application.Interfaces;
+using WeddingApp_Test.Application.Services;
 using WeddingApp_Test.Infrastructure.Persistence;
 using WeddingApp_Test.Infrastructure.Repositories;
 
@@ -23,6 +25,10 @@ else
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// Services
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 // Adding Swagger to project
 builder.Services.AddSwaggerGen();

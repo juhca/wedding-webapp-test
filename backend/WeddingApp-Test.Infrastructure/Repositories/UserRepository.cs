@@ -18,6 +18,18 @@ public class UserRepository(AppDbContext context) : IUserRepository
 		await context.SaveChangesAsync();
 	}
 
+	public Task<bool> CheckIfUserExists(User user)
+	{
+		return context.Users.AnyAsync(u => 
+			u.FirstName.Equals(user.FirstName, StringComparison.InvariantCultureIgnoreCase) 
+			&& u.LastName.Equals(user.LastName, StringComparison.InvariantCultureIgnoreCase));
+	}
+
+	public async Task<User?> GetByAccessCode(string accessCode)
+	{
+		return await context.Users.FirstOrDefaultAsync(x => x.AccessCode == accessCode);
+	}
+
 	public async Task<IEnumerable<User>> GetAllAsync()
 	{
 		return await context.Users.ToListAsync();

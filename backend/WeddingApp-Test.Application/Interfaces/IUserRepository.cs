@@ -10,6 +10,8 @@ namespace WeddingApp_Test.Application.Common.Interfaces;
 public interface IUserRepository
 {
 	Task<User?> GetByIdAsync(Guid id);
+	Task<User?> GetByAccessCode(string accessCode);
 	Task<IEnumerable<User>> GetAllAsync();
 	Task AddAsync(User user);
+	Task<bool> CheckIfUserExists(User user);
 }
