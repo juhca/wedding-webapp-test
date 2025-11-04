@@ -1,10 +1,36 @@
+using Microsoft.EntityFrameworkCore;
+using WeddingApp_Test.Application.Common.Interfaces;
+using WeddingApp_Test.Application.Interfaces;
+using WeddingApp_Test.Application.Services;
+using WeddingApp_Test.Infrastructure.Persistence;
+using WeddingApp_Test.Infrastructure.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
 
-// Adding Swagger to my project
+// Choose DB provider
+var useInMemory = builder.Configuration.GetValue<bool>("UseInMemoryDatabase");
+if (useInMemory)
+{
+    builder.Services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("InMemoryDb"));
+}
+else
+{
+	builder.Services.AddDbContext<AppDbContext>(options =>
+		options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
+}
+
+// Repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// Services
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+// Adding Swagger to project
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();

@@ -56,3 +56,4 @@ nunit-*.xml
 # .idea ~ what is this
 .idea*
 .vscode
+.vs
