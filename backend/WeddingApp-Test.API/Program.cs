@@ -29,6 +29,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 // Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Adding Swagger to project
 builder.Services.AddSwaggerGen();

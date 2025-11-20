@@ -28,18 +28,4 @@ public class UsersController(IUserService userService) : ControllerBase
 	{
 		return Ok(await userService.GetAllUsersAsync());
 	}
-	
-	[HttpPost]
-	public async Task<IActionResult> AdminLogin(LoginRequest loginRequest)
-	{
-		throw new NotImplementedException();
-	}
-	
-	[HttpPost]
-	public async Task<GuestLoginResponse> GuestLogin(GuestLoginRequest loginRequest)
-	{
-		throw new NotImplementedException();
-	}
-	
-	
 }
