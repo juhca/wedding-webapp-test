@@ -52,7 +52,7 @@ public class UserRepository(AppDbContext context) : IUserRepository
 	public async Task AddRefreshTokenAsync(User user, RefreshToken refreshToken)
 	{
 		refreshToken.UserId =  user.Id;
-		user.RefreshTokens.Add(refreshToken);
+		context.RefreshTokens.Add(refreshToken);
 		await context.SaveChangesAsync();
 	}
 	

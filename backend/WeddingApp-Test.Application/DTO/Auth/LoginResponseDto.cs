@@ -2,4 +2,4 @@
 
 namespace WeddingApp_Test.Application.DTO.Auth;
 
-public record LoginResponseDto(string Token, RefreshToken  RefreshToken);
+public record LoginResponseDto(string Token, RefreshTokenDto  RefreshToken);

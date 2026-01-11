@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using WeddingApp_Test.Application.Common.Interfaces;
+﻿using WeddingApp_Test.Application.Common.Interfaces;
 using WeddingApp_Test.Application.DTO;
 using WeddingApp_Test.Application.DTO.Auth;
 using WeddingApp_Test.Application.Interfaces;
@@ -40,7 +39,7 @@ public class AuthService : IAuthService
         // Set the refresh token
         await _userRepository.AddRefreshTokenAsync(user, refreshToken);
         
-        return new LoginResponseDto(accessToken, refreshToken);
+        return new LoginResponseDto(accessToken, new RefreshTokenDto(refreshToken.Token, refreshToken.Expires, refreshToken.Created));
     }
 
     public async Task<LoginResponseDto?> AdminLogin(AdminLoginRequest loginRequest)
@@ -73,6 +72,6 @@ public class AuthService : IAuthService
         var refreshToken = _tokenService.CreateRefreshToken(user);
         await _userRepository.AddRefreshTokenAsync(user, refreshToken);
         
-        return new LoginResponseDto(token, refreshToken);
+        return new LoginResponseDto(token, new RefreshTokenDto(refreshToken.Token, refreshToken.Expires, refreshToken.Created));
     }
 }

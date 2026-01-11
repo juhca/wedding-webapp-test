@@ -2,4 +2,4 @@
 
 namespace WeddingApp_Test.Application.DTO;
 
-public record LoginResponse(string AccessToken, RefreshToken RefreshToken, DateTime ExpiresOn);
+public record LoginResponse(string AccessToken, RefreshTokenDto RefreshToken, DateTime ExpiresOn);
