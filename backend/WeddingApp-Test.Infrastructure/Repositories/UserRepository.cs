@@ -63,13 +63,43 @@ public class UserRepository(AppDbContext context) : IUserRepository
 		var user = await context.Users
 			.Include(u => u.RefreshTokens)
 			.FirstOrDefaultAsync(u => u.Id == userId);
-		
+
 		if (user is null)
 		{
 			return;
 		}
-		
+
 		user.RefreshTokens.RemoveAll(rt => rt.Expires < DateTime.UtcNow);
+		await context.SaveChangesAsync();
+	}
+
+	public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
+	{
+		return await context.RefreshTokens
+			.Include(rt => rt.User)
+			.FirstOrDefaultAsync(rt => rt.Token == token);
+	}
+
+	public async Task RevokeRefreshTokenAsync(RefreshToken token, string? replacedByToken = null)
+	{
+		token.IsRevoked = true;
+		token.RevokedAt = DateTime.UtcNow;
+		token.ReplacedByToken = replacedByToken;
+		await context.SaveChangesAsync();
+	}
+
+	public async Task RevokeAllUserTokensAsync(Guid userId)
+	{
+		var tokens = await context.RefreshTokens
+			.Where(rt => rt.UserId == userId && !rt.IsRevoked)
+			.ToListAsync();
+
+		foreach (var token in tokens)
+		{
+			token.IsRevoked = true;
+			token.RevokedAt = DateTime.UtcNow;
+		}
+
 		await context.SaveChangesAsync();
 	}
 }

@@ -8,4 +8,6 @@ public interface IAuthService
 {
     Task<LoginResponseDto?> GuestLogin(GuestLoginRequest loginRequest);
     Task<LoginResponseDto?> AdminLogin(AdminLoginRequest loginRequest);
+    Task<LoginResponseDto?> RefreshTokenAsync(RefreshTokenRequest request);
+    Task<bool> RevokeTokenAsync(string token);
 }

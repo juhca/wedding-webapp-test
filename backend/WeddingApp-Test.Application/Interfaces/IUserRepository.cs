@@ -17,4 +17,7 @@ public interface IUserRepository
 	Task<bool> CheckIfUserExists(User user);
 	Task RemoveExpiredTokens(Guid userId);
 	Task AddRefreshTokenAsync(User user, RefreshToken refreshToken);
+	Task<RefreshToken?> GetRefreshTokenAsync(string token);
+	Task RevokeRefreshTokenAsync(RefreshToken token, string? replacedByToken = null);
+	Task RevokeAllUserTokensAsync(Guid userId);
 }

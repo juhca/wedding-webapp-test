@@ -75,4 +75,45 @@ public class AuthService : IAuthService
         
         return new LoginResponseDto(token, new RefreshTokenDto(refreshToken.Token, refreshToken.Expires, refreshToken.Created));
     }
+
+    public async Task<LoginResponseDto?> RefreshTokenAsync(RefreshTokenRequest request)
+    {
+        var existingToken = await _userRepository.GetRefreshTokenAsync(request.RefreshToken);
+
+        // Validate token exists and is active
+        if (existingToken is null || !existingToken.IsActive)
+        {
+            return null;
+        }
+
+        var user = existingToken.User;
+
+        // Create new tokens
+        var newJwtToken = _tokenService.CreateJwtToken(user);
+        var newRefreshToken = _tokenService.CreateRefreshToken(user);
+
+        // Revoke old token and mark it as replaced
+        await _userRepository.RevokeRefreshTokenAsync(existingToken, newRefreshToken.Token);
+
+        // Save new refresh token
+        await _userRepository.AddRefreshTokenAsync(user, newRefreshToken);
+
+        return new LoginResponseDto(
+            newJwtToken,
+            new RefreshTokenDto(newRefreshToken.Token, newRefreshToken.Expires, newRefreshToken.Created)
+        );
+    }
+
+    public async Task<bool> RevokeTokenAsync(string token)
+    {
+        var existingToken = await _userRepository.GetRefreshTokenAsync(token);
+
+        if (existingToken is null || !existingToken.IsActive)
+        {
+            return false;
+        }
+
+        await _userRepository.RevokeRefreshTokenAsync(existingToken);
+        return true;
+    }
 }

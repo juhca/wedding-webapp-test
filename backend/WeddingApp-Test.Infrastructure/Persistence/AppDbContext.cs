@@ -39,7 +39,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 			
 			entity.Property(rt => rt.Expires)
 				.IsRequired();
-			
+
+			entity.Property(rt => rt.IsRevoked)
+				.IsRequired();
+
+			// Ignore computed property
+			entity.Ignore(rt => rt.IsActive);
+
 			// Configure relationship
 			entity.HasOne(rt => rt.User)
 				.WithMany(u => u.RefreshTokens)

@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WeddingApp_Test.Application.DTO;
+using WeddingApp_Test.Application.DTO.Auth;
 using WeddingApp_Test.Application.DTO.Login;
 using WeddingApp_Test.Application.Interfaces;
-using WeddingApp_Test.Application.Services;
 
 namespace WeddingApp_Test.API.Controllers;
 
@@ -35,7 +34,33 @@ public class AuthController(IAuthService authService) : ControllerBase
         {
             return Unauthorized("Invalid Access Code");
         }
-        
+
         return Ok(result);
+    }
+
+    [HttpPost("Refresh")]
+    public async Task<ActionResult<LoginResponseDto>> Refresh(RefreshTokenRequest request)
+    {
+        var result = await authService.RefreshTokenAsync(request);
+
+        if (result is null)
+        {
+            return Unauthorized("Invalid or expired refresh token");
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPost("Revoke")]
+    public async Task<IActionResult> Revoke(RefreshTokenRequest request)
+    {
+        var success = await authService.RevokeTokenAsync(request.RefreshToken);
+
+        if (!success)
+        {
+            return BadRequest("Token not found or already revoked");
+        }
+
+        return Ok(new { message = "Token revoked successfully" });
     }
 }
