@@ -1,6 +1,7 @@
 ﻿using WeddingApp_Test.Application.Common.Interfaces;
 using WeddingApp_Test.Application.DTO;
 using WeddingApp_Test.Application.DTO.Auth;
+using WeddingApp_Test.Application.DTO.Login;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Domain.Enums;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WeddingApp_Test.Application.DTO;
+using WeddingApp_Test.Application.DTO.Login;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Application.Services;
 
