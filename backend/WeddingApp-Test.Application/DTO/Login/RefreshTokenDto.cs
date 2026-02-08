@@ -1,4 +1,4 @@
-﻿namespace WeddingApp_Test.Application.DTO;
+﻿namespace WeddingApp_Test.Application.DTO.Login;
 
 public record RefreshTokenDto(
     string Token,
