@@ -21,8 +21,4 @@
       <ProjectReference Include="..\WeddingApp-Test.Infrastructure\WeddingApp-Test.Infrastructure.csproj" />
     </ItemGroup>
     
-    <ItemGroup>
-        <InternalsVisibleTo Include="WeddingApp-Test.API.Tests"/>
-    </ItemGroup>
-
 </Project>

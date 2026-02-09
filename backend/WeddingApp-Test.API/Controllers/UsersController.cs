@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using WeddingApp_Test.Application.DTO;
@@ -12,6 +13,7 @@ namespace WeddingApp_Test.API.Controllers;
 public class UsersController(IUserService userService) : ControllerBase
 {
 	[HttpPost]
+	[AllowAnonymous]
 	public async Task<IActionResult> AddUser(CreateUserRequest user)
 	{
 		var newUser = await userService.CreateUserAsync(user);
@@ -24,6 +26,7 @@ public class UsersController(IUserService userService) : ControllerBase
 	}
 	
 	[HttpGet]
+	[AllowAnonymous]
 	public async Task<IActionResult> GetAll()
 	{
 		return Ok(await userService.GetAllUsersAsync());
