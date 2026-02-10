@@ -33,12 +33,11 @@ public class AuthControllerTests : IClassFixture<WeddingAppWebApplicationFactory
         // Arrange
         var email = "admin@wedding.com";
         var password = "SecurePassword123";
-        var (hash, salt) = TestDataBuilder.CreatePasswordHashAndSalt(password);
-        
+
         // Seed the database with a test admin user
         await SeedDatabase(db =>
         {
-            var admin = TestDataBuilder.CreateAdminUser(email, hash, salt);
+            var admin = TestDataBuilder.CreateAdminUser(email, password);
             db.Users.Add(admin);
         });
         

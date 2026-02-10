@@ -1,4 +1,7 @@
-﻿using WeddingApp_Test.Domain.Entities;
+﻿using Microsoft.AspNetCore.Identity;
+using WeddingApp_Test.Application.Interfaces;
+using WeddingApp_Test.Application.Services;
+using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Domain.Enums;
 
 namespace WeddingApp_Test.API.Tests.Helpers;
@@ -9,12 +12,16 @@ namespace WeddingApp_Test.API.Tests.Helpers;
 /// </summary>
 public class TestDataBuilder
 {
+    private static readonly IPasswordHasher _passwordHasher = new PasswordHasher();
+
     /// <summary>
     /// Creates an admin user with email/password authentication
     /// </summary>
-    public static User CreateAdminUser(string email, byte[] passwordHash, byte[] passwordSalt)
-    {
-        return new User
+    public static User CreateAdminUser(string email, string password)
+	{
+		_passwordHasher.CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+
+		return new User
         {
             Id = Guid.NewGuid(),
             FirstName = "Admin",
