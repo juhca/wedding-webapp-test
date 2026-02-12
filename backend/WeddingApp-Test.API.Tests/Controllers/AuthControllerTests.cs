@@ -55,15 +55,51 @@ public class AuthControllerTests : IClassFixture<WeddingAppWebApplicationFactory
         Assert.True(loginResponse.RefreshToken.Expires > DateTime.UtcNow);
     }
 
-    #endregion
-    
-    
-    #region HelperMethods
-    /// <summary>
-    /// Helper method to seed the database with test data.
-    /// Creates a new scope and disposes it properly after seeding.
-    /// </summary>
-    private async Task SeedDatabase(Action<AppDbContext> seedAction)
+
+	[Fact]
+	public async Task GuestLogin_GetAllUsers_ReturnsNotAuth()
+	{
+        // Arrange
+        // Seed the database with a test guest user
+        var accessCode = "TestAccessCode";
+
+		await SeedDatabase(db =>
+		{
+			var user = TestDataBuilder.CreateGuestUser(accessCode);
+			db.Users.Add(user);
+		});
+
+        var loginRequest = new GuestLoginRequest(accessCode);
+
+		// Act
+        // 1. Login first to get the token
+		var loginResponse = await _client.PostAsJsonAsync("/api/Auth/GuestLogin", loginRequest);
+		loginResponse.EnsureSuccessStatusCode();
+        
+
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+		Assert.NotNull(loginResult);
+		Assert.NotNull(loginResult.Token);
+
+        // 2. Try to access GetAll with token from guest
+        var getAllRequest = new HttpRequestMessage(HttpMethod.Get, "/api/Users/GetAll");
+        getAllRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult.Token);
+
+        var getAllResponse = await _client.SendAsync(getAllRequest);
+
+		// Assert - Guest should not be authorized to get all users
+		Assert.Equal(HttpStatusCode.Forbidden, getAllResponse.StatusCode);
+	}
+
+	#endregion
+
+
+	#region HelperMethods
+	/// <summary>
+	/// Helper method to seed the database with test data.
+	/// Creates a new scope and disposes it properly after seeding.
+	/// </summary>
+	private async Task SeedDatabase(Action<AppDbContext> seedAction)
     {
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

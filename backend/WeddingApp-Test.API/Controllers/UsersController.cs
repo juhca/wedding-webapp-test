@@ -14,7 +14,8 @@ namespace WeddingApp_Test.API.Controllers;
 public class UsersController(IUserService userService) : ControllerBase
 {
 	[HttpPost]
-	[AllowAnonymous]
+	[Route("AddUser")]
+	[Authorize(Roles = nameof(UserRole.Admin))]
 	public async Task<IActionResult> AddUser(CreateUserRequest user)
 	{
 		var newUser = await userService.CreateUserAsync(user);
@@ -27,6 +28,7 @@ public class UsersController(IUserService userService) : ControllerBase
 	}
 	
 	[HttpGet]
+	[Route("GetAll")]
 	[Authorize(Roles = nameof(UserRole.Admin))]
 	public async Task<IActionResult> GetAll()
 	{
