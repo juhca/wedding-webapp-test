@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using WeddingApp_Test.Application.DTO;
 using WeddingApp_Test.Application.DTO.User;
 using WeddingApp_Test.Application.Interfaces;
+using WeddingApp_Test.Domain.Enums;
 
 namespace WeddingApp_Test.API.Controllers;
 
@@ -26,7 +27,7 @@ public class UsersController(IUserService userService) : ControllerBase
 	}
 	
 	[HttpGet]
-	[AllowAnonymous]
+	[Authorize(Roles = nameof(UserRole.Admin))]
 	public async Task<IActionResult> GetAll()
 	{
 		return Ok(await userService.GetAllUsersAsync());
