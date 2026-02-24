@@ -85,6 +85,7 @@ public class UserRepository(AppDbContext context) : IUserRepository
 		token.IsRevoked = true;
 		token.RevokedAt = DateTime.UtcNow;
 		token.ReplacedByToken = replacedByToken;
+		
 		await context.SaveChangesAsync();
 	}
 
