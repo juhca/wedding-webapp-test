@@ -73,6 +73,17 @@ public class UserService : IUserService
             .ToList();
     }
 
+    public async Task<UserDto?> GetUserAsync(Guid userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user is null)
+        {
+            return null;
+        }
+
+        return new UserDto(user.FirstName, user.LastName, user.Email, user.PasswordHash, user.AccessCode, user.Role);
+    }
+
     private async Task<string> GenerateAccessCode(int length = 6)
     { 
         var chars =
