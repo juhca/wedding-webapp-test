@@ -1,12 +1,13 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Configuration;
+using WeddingApp_Test.Application.Common.Interfaces;
 using WeddingApp_Test.Application.Interfaces;
 
 namespace WeddingApp_Test.Application.Services;
 
 public class PasswordHasher : IPasswordHasher
 {
-    
     public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
     {
         using (var hmac = new HMACSHA512())
