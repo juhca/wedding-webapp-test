@@ -17,7 +17,8 @@ public class WeddingInfoService : IWeddingInfoService
             GroomName = "John",
             GroomSurname = "Toe",
             WeddingName = "Jane & Joe Wedding Day",
-            WeddingDescription = "Wedding Day Description"
+            WeddingDescription = "Wedding Day Description",
+            UserRole = userRole
         };
 
         if (userRole is null)

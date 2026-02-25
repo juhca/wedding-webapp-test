@@ -1,8 +1,11 @@
-﻿namespace WeddingApp_Test.Application.DTO.WeddingInfo;
+﻿using WeddingApp_Test.Domain.Enums;
+
+namespace WeddingApp_Test.Application.DTO.WeddingInfo;
 
 public class WeddingInfoDto
 {
     // Visible to anyone
+    public UserRole? UserRole { get; set; }
     public string? BrideName { get; set; }
     public string? BrideSurname { get; set; }
     public string? GroomName { get; set; }
