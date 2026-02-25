@@ -5,6 +5,7 @@ using WeddingApp_Test.API.Tests.Helpers;
 using WeddingApp_Test.Application.DTO.Auth;
 using WeddingApp_Test.Application.DTO.Login;
 using WeddingApp_Test.Application.DTO.WeddingInfo;
+using WeddingApp_Test.Domain.Enums;
 using WeddingApp_Test.Infrastructure.Persistence;
 
 namespace WeddingApp_Test.API.Tests.Controllers;
@@ -38,15 +39,22 @@ public class WeddingInfoControllerTests : IClassFixture<WeddingAppWebApplication
 
         var loginRequest = new AdminLoginRequest(email, password);
         var loginResponse = await _client.PostAsJsonAsync("/api/Auth/AdminLogin", loginRequest);
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
         loginResponse.EnsureSuccessStatusCode();
+        Assert.NotNull(loginResult);
+        Assert.NotNull(loginResult.Token);
         
         // Act
+        // Add the token to the Authorization header
+        _client.DefaultRequestHeaders.Authorization = 
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult.Token);
         var weddingInfoResponse = await _client.GetAsync("/api/WeddingInfo");
         weddingInfoResponse.EnsureSuccessStatusCode();
         
         // Assert
         var weddingInfoResult = await weddingInfoResponse.Content.ReadFromJsonAsync<WeddingInfoDto>();
         Assert.NotNull(weddingInfoResult);
+        Assert.Equal(weddingInfoResult.UserRole, UserRole.Admin);
     }
     
     #region HelperMethods
