@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WeddingApp_Test.Application.DTO.WeddingInfo;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Enums;
 
@@ -20,6 +21,7 @@ public class WeddingInfoController(IWeddingInfoService weddingInfoService, IUser
     /// </summary>
     [HttpGet]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(WeddingInfoDto), 200)]
     public async Task<IActionResult> GetWeddingInfo()
     {
         UserRole? userRole = null;
@@ -30,16 +32,13 @@ public class WeddingInfoController(IWeddingInfoService weddingInfoService, IUser
             if (Guid.TryParse(userIdClaim, out var userId))
             {
                 var user = await userService.GetUserAsync(userId);
-                if (user is null)
-                {
-                    
-                }
                 userRole = user?.Role;
             }
         }
 
         var info = await weddingInfoService.GetWeddingInfoAsync(userRole);
-        return Ok();
+        
+        return Ok(info);
     }
     
 }

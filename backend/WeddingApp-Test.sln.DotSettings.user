@@ -12,5 +12,6 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d0e28255_002Dad6c_002D43c3_002Dbe19_002D7275d33a3d7a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="AdminLogin_WithValidCredentials_ReturnsOkWithTokens" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.AuthControllerTests.AdminLogin_WithValidCredentials_ReturnsOkWithTokens&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.WeddingInfoControllerTests.WeddingInfo_ReturnBasicWeddingInfo&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
