@@ -1,5 +1,4 @@
-﻿using WeddingApp_Test.Application.Common.Interfaces;
-using WeddingApp_Test.Application.DTO;
+﻿using WeddingApp_Test.Application.DTO;
 using WeddingApp_Test.Application.DTO.Auth;
 using WeddingApp_Test.Application.DTO.Login;
 using WeddingApp_Test.Application.Interfaces;

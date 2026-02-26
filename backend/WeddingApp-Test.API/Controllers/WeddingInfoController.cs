@@ -41,4 +41,47 @@ public class WeddingInfoController(IWeddingInfoService weddingInfoService, IUser
         return Ok(info);
     }
     
+    /// <summary>
+    /// Initialize wedding info (Admin only - one time setup)
+    /// </summary>
+    [HttpPost("initialize")]
+    [Authorize(Roles = nameof(UserRole.Admin))]
+    [ProducesResponseType(typeof(WeddingInfoDto), 201)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> InitializeWeddingInfo([FromBody] WeddingInfoUpdateDto dto)
+    {
+        try
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var info = await weddingInfoService.InitializeWeddingInfoAsync(dto, userId);
+            
+            return Created(string.Empty, info);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Update wedding info (Admin only)
+    /// </summary>
+    [HttpPut]
+    [Authorize(Roles = nameof(UserRole.Admin))]
+    [ProducesResponseType(typeof(WeddingInfoDto), 200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> UpdateWeddingInfo([FromBody] WeddingInfoUpdateDto dto)
+    {
+        try
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var info = await weddingInfoService.UpdateWeddingInfoAsync(dto, userId);
+            
+            return Ok(info);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }

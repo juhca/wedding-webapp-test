@@ -1,7 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
-using WeddingApp_Test.Application.Common.Interfaces;
 using WeddingApp_Test.Application.Interfaces;
 
 namespace WeddingApp_Test.Application.Services;

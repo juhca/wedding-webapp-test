@@ -1,7 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
-using WeddingApp_Test.Application.Common.Interfaces;
 using WeddingApp_Test.Application.DTO.User;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;

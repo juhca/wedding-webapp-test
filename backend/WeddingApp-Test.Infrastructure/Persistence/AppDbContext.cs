@@ -7,11 +7,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
 	public DbSet<User> Users => Set<User>();
 	public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+	public DbSet<WeddingInfo> WeddingInfo => Set<WeddingInfo>();
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
 
+		// USER CONFIGURATION
 		// enum will be saved as a string to db
 		modelBuilder.Entity<User>(entity =>
 		{
@@ -21,7 +23,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 				.HasConversion<string>();
 		});
 			
-
+		// REFRESH TOKEN CONFIGURATION
 		modelBuilder.Entity<RefreshToken>(entity =>
 		{
 			entity.HasKey(rt => rt.Id);
@@ -51,6 +53,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 				.WithMany(u => u.RefreshTokens)
 				.HasForeignKey(rt => rt.UserId)
 				.OnDelete(DeleteBehavior.Cascade);
+		});
+		
+		// WEDDING INFO CONFIGURATION
+		modelBuilder.Entity<WeddingInfo>(entity =>
+		{
+			entity.HasKey(w => w.Id);
+			entity.HasOne(w => w.UpdatedBy)
+				.WithMany()
+				.HasForeignKey(w => w.UpdatedByUserId)
+				.OnDelete(DeleteBehavior.SetNull);
+			
+			// Decimal precision for coordinates
+			entity.Property(w => w.CivilLocationLatitude).HasPrecision(10, 7);
+			entity.Property(w => w.CivilLocationLongitude).HasPrecision(10, 7);
+			entity.Property(w => w.ChurchLocationLatitude).HasPrecision(10, 7);
+			entity.Property(w => w.ChurchLocationLongitude).HasPrecision(10, 7);
+			entity.Property(w => w.PartyLocationLatitude).HasPrecision(10, 7);
+			entity.Property(w => w.PartyLocationLongitude).HasPrecision(10, 7);
+			entity.Property(w => w.HouseLocationLatitude).HasPrecision(10, 7);
+			entity.Property(w => w.HouseLocationLongitude).HasPrecision(10, 7);
 		});
 
 	}

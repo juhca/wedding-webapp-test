@@ -7,4 +7,5 @@ public class LocationDto
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? GoogleMapsUrl { get; set; }
+    public string? AppleMapsUrl { get; set; }
 }
