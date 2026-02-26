@@ -5,20 +5,19 @@ namespace WeddingApp_Test.Application.DTO.WeddingInfo;
 public class WeddingInfoDto
 {
     // Visible to anyone
-    public UserRole? UserRole { get; set; }
-    public string? BrideName { get; set; }
-    public string? BrideSurname { get; set; }
-    public string? GroomName { get; set; }
-    public string? GroomSurname { get; set; }
-    public string? ApproximateDate { get; set; } // ex.: Summer 2027
-    public string? WeddingName { get; set; }
-    public string? WeddingDescription { get; set; }
+    public UserRole? UserRole { get; set; } // can be null if user authenticated
+    public string BrideName { get; set; } = string.Empty;
+    public string BrideSurname { get; set; } = string.Empty;
+    public string GroomName { get; set; } = string.Empty;
+    public string GroomSurname { get; set; } = string.Empty;
+    public string ApproximateDate { get; set; } = string.Empty; // ex.: Summer 2027
+    public string WeddingName { get; set; } = string.Empty;
+    public string WeddingDescription { get; set; } = string.Empty;
     
     // Visible to Authenticated users
-    public DateTime WeddingDate { get; set; }
+    public DateTime? WeddingDate { get; set; }
     public LocationDto? LocationCivil { get; set; }
     public LocationDto? LocationChurch { get; set; }
-    // lokacija civilna + cerkvena
     
     // Visible to Full + Admin
     public LocationDto? LocationParty { get; set; }

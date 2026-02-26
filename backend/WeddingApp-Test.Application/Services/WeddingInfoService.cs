@@ -50,7 +50,6 @@ public class WeddingInfoService : IWeddingInfoService
             return info;
         }
         
-        
         info.LocationParty = new LocationDto()
         {
             Name = "Grand Hotel Union",
