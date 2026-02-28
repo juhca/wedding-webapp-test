@@ -8,18 +8,24 @@ namespace WeddingApp_Test.Application.Services;
 
 public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository, IMapper mapper) : IWeddingInfoService
 {
-    public async Task<WeddingInfoDto> GetWeddingInfoAsync(UserRole? userRole)
+    public async Task<WeddingInfoDto?> GetWeddingInfoAsync(UserRole? userRole)
     {
-        // TODO GET FROM SETTINGS/CONFIG/DB
+        var weddingInfo = await weddingInfoRepository.GetWeddingInfoAsync();
+
+        if (weddingInfo is null)
+        {
+            return null;
+        }
+        
         var info = new WeddingInfoDto
         {
-            ApproximateDate = "Summer 2027",
-            BrideName = "Jane",
-            BrideSurname = "Doe",
-            GroomName = "John",
-            GroomSurname = "Toe",
-            WeddingName = "Jane & Joe Wedding Day",
-            WeddingDescription = "Wedding Day Description",
+            ApproximateDate = weddingInfo.ApproximateDate,
+            BrideName = weddingInfo.BrideName,
+            BrideSurname = weddingInfo.BrideSurname,
+            GroomName = weddingInfo.GroomName,
+            GroomSurname = weddingInfo.GroomSurname,
+            WeddingName = weddingInfo.WeddingName,
+            WeddingDescription = weddingInfo.WeddingDescription,
             UserRole = userRole
         };
 
@@ -28,25 +34,25 @@ public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository, IM
             return info;
         }
         
-        info.WeddingDate = new DateTime(2027, 6, 19, 12, 45, 0);
+        info.WeddingDate = weddingInfo.WeddingDate;
         info.LocationCivil = new LocationDto()
         {
-            Name = "Ljubljana City Hall",
-            Address = "Mestni trg 1, 1000 Ljubljana, Slovenia",
-            Latitude = 46.0503,
-            Longitude = 14.5069,
-            GoogleMapsUrl = "https://maps.google.com/?q=46.0503,14.5069",
-            AppleMapsUrl = "https://maps.google.com/?q=46.0522,14.5155"
+            Name = weddingInfo.CivilLocationName,
+            Address = weddingInfo.CivilLocationAddress,
+            Latitude = weddingInfo.CivilLocationLatitude,
+            Longitude = weddingInfo.CivilLocationLongitude,
+            GoogleMapsUrl = weddingInfo.CivilLocationGoogleMapsUrl,
+            AppleMapsUrl = weddingInfo.CivilLocationAppleMapsUrl
         };
         
         info.LocationChurch = new LocationDto()
         {
-            Name = "St. Nicholas Cathedral",
-            Address = "Dolničarjeva ulica 1, 1000 Ljubljana, Slovenia",
-            Latitude = 46.0512,
-            Longitude = 14.5082,
-            GoogleMapsUrl = "https://maps.google.com/?q=46.0512,14.5082",
-            AppleMapsUrl = "https://maps.google.com/?q=46.0522,14.5155"
+            Name = weddingInfo.ChurchLocationName,
+            Address = weddingInfo.ChurchLocationAddress,
+            Latitude = weddingInfo.ChurchLocationLatitude,
+            Longitude = weddingInfo.ChurchLocationLongitude,
+            GoogleMapsUrl = weddingInfo.ChurchLocationGoogleMapsUrl,
+            AppleMapsUrl = weddingInfo.ChurchLocationAppleMapsUrl
         };
 
         if (userRole == UserRole.LimitedExperience)
@@ -56,12 +62,12 @@ public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository, IM
         
         info.LocationParty = new LocationDto()
         {
-            Name = "Grand Hotel Union",
-            Address = "Miklošičeva cesta 1, 1000 Ljubljana, Slovenia",
-            Latitude = 46.0546,
-            Longitude = 14.5066,
-            GoogleMapsUrl = "https://maps.google.com/?q=46.0546,14.5066",
-            AppleMapsUrl = "https://maps.google.com/?q=46.0522,14.5155"
+            Name = weddingInfo.PartyLocationName,
+            Address = weddingInfo.PartyLocationAddress,
+            Latitude = weddingInfo.PartyLocationLatitude,
+            Longitude = weddingInfo.PartyLocationLongitude,
+            GoogleMapsUrl = weddingInfo.PartyLocationGoogleMapsUrl,
+            AppleMapsUrl = weddingInfo.PartyLocationAppleMapsUrl
         };
     
         if (userRole == UserRole.FullExperience)
@@ -72,18 +78,18 @@ public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository, IM
         // Only admin can receive this
         info.LocationHouse = new LocationDto()
         {
-            Name = "Bride's Family Home",
-            Address = "Trubarjeva cesta 50, 1000 Ljubljana, Slovenia",
-            Latitude = 46.0522,
-            Longitude = 14.5155,
-            GoogleMapsUrl = "https://maps.google.com/?q=46.0522,14.5155",
-            AppleMapsUrl = "https://maps.google.com/?q=46.0522,14.5155"
+            Name = weddingInfo.HouseLocationName,
+            Address = weddingInfo.HouseLocationAddress,
+            Latitude = weddingInfo.HouseLocationLatitude,
+            Longitude = weddingInfo.HouseLocationLongitude,
+            GoogleMapsUrl = weddingInfo.HouseLocationGoogleMapsUrl,
+            AppleMapsUrl = weddingInfo.HouseLocationAppleMapsUrl
         };
             
         return info;
     }
 
-    public async Task<WeddingInfoDto> UpdateWeddingInfoAsync(WeddingInfoUpdateDto dto, Guid updatedByUserId)
+    public async Task<WeddingInfoDto?> UpdateWeddingInfoAsync(WeddingInfoUpdateDto dto, Guid updatedByUserId)
     {
         var weddingInfo = await weddingInfoRepository.GetWeddingInfoAsync();
         
@@ -98,7 +104,7 @@ public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository, IM
         return await GetWeddingInfoAsync(UserRole.Admin);
     }
 
-    public async Task<WeddingInfoDto> InitializeWeddingInfoAsync(WeddingInfoUpdateDto dto, Guid createdByUserId)
+    public async Task<WeddingInfoDto?> InitializeWeddingInfoAsync(WeddingInfoUpdateDto dto, Guid createdByUserId)
     {
         var exists = await weddingInfoRepository.ExistsAsync();
         if (exists)
