@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WeddingApp_Test.Application.Common.Interfaces;
+using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Infrastructure.Persistence;
 

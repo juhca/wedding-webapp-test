@@ -1,7 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
-using WeddingApp_Test.Application.Common.Interfaces;
 using WeddingApp_Test.Application.DTO.User;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
@@ -71,6 +70,17 @@ public class UserService : IUserService
         return users.Select(user => 
             new UserDto(user.FirstName, user.LastName, user.Email, user.PasswordHash, user.AccessCode, user.Role))
             .ToList();
+    }
+
+    public async Task<UserDto?> GetUserAsync(Guid userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user is null)
+        {
+            return null;
+        }
+
+        return new UserDto(user.FirstName, user.LastName, user.Email, user.PasswordHash, user.AccessCode, user.Role);
     }
 
     private async Task<string> GenerateAccessCode(int length = 6)
