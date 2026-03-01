@@ -103,20 +103,25 @@ var app = builder.Build();
 // Data seeding
 if (app.Environment.IsDevelopment())
 {
-    using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
-	var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+    var isTestEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing";
 
-    Console.WriteLine("");
-    Console.WriteLine("=== Seeding development data ===");
-    Console.WriteLine("");
+    if (!isTestEnvironment)
+    {
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+
+        Console.WriteLine("");
+        Console.WriteLine("=== Seeding development data ===");
+        Console.WriteLine("");
     
-    // Seed essential data (Admin + WeddingInfo)
-    DataSeeder.SeedDevelopmentData(context, passwordHasher, tokenService);
+        // Seed essential data (Admin + WeddingInfo)
+        DataSeeder.SeedDevelopmentData(context, passwordHasher, tokenService);
     
-    Console.WriteLine("=== Seeding completed ===");
-    Console.WriteLine("");
+        Console.WriteLine("=== Seeding completed ===");
+        Console.WriteLine("");
+    }
 }
 
 // Configure the HTTP request pipeline.
