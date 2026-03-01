@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 using WeddingApp_Test.Domain.Enums;
 
 namespace WeddingApp_Test.Domain.Entities;
@@ -28,7 +23,16 @@ public class User
 	public List<RefreshToken> RefreshTokens { get; set; } = [];
 	
 	// Authorization
+	public UserRole Role
+	{
+		get; set; 
+		
+	}
 	
-	public UserRole Role { get; set; }
-	
+	/// <summary>
+	/// Maximum number of companions this guest can bring (default 1)
+	/// 0 = no companions allowed
+	/// null = unlimited (admin only)
+	/// </summary>
+	public int? MaxCompanions { get; set; } = 1;
 }

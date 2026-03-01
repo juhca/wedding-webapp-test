@@ -20,6 +20,9 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
     
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        // SET environment to Testing ~ to not execute data seeding
+        builder.UseEnvironment("Testing");
+        
         builder.ConfigureServices(services =>
         {
             // Remove the existing DbContext registration
@@ -49,5 +52,19 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
             // Ensure the database is created
             db.Database.EnsureCreated();
         });
+    }
+    
+    public async Task ResetDatabaseAsync()
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        
+        // Remove all data
+        db.Users.RemoveRange(db.Users);
+        db.Rsvps.RemoveRange(db.Rsvps);
+        db.GuestCompanions.RemoveRange(db.GuestCompanions);
+        db.WeddingInfo.RemoveRange(db.WeddingInfo);
+        
+        await db.SaveChangesAsync();
     }
 }

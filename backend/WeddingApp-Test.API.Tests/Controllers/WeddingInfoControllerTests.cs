@@ -47,8 +47,8 @@ public class WeddingInfoControllerTests : IClassFixture<WeddingAppWebApplication
         // Seed the database with a test admin user
         await SeedDatabase(db =>
         {
-            var admin = TestDataBuilder.CreateGuestUser(accessCode, UserRole.LimitedExperience);
-            db.Users.Add(admin);
+            var guestUser = TestDataBuilder.CreateGuestUser(accessCode, UserRole.LimitedExperience);
+            db.Users.Add(guestUser);
         });
 
         var loginRequest = new GuestLoginRequest(accessCode);
@@ -84,8 +84,8 @@ public class WeddingInfoControllerTests : IClassFixture<WeddingAppWebApplication
         // Seed the database with a test admin user
         await SeedDatabase(db =>
         {
-            var admin = TestDataBuilder.CreateGuestUser(accessCode, UserRole.FullExperience);
-            db.Users.Add(admin);
+            var fullExGuest = TestDataBuilder.CreateGuestUser(accessCode, UserRole.FullExperience);
+            db.Users.Add(fullExGuest);
         });
 
         var loginRequest = new GuestLoginRequest(accessCode);

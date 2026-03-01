@@ -60,7 +60,7 @@ public class UserService : IUserService
         
         await _userRepository.AddAsync(newUser);
 
-        return new UserDto(newUser.FirstName, newUser.LastName,newUser.Email, newUser.PasswordHash, newUser.AccessCode, newUser.Role);
+        return new UserDto(newUser.FirstName, newUser.LastName,newUser.Email, newUser.PasswordHash, newUser.AccessCode, newUser.Role, newUser.MaxCompanions);
     }
 
     public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
@@ -68,7 +68,7 @@ public class UserService : IUserService
         var users = await _userRepository.GetAllAsync();
 
         return users.Select(user => 
-            new UserDto(user.FirstName, user.LastName, user.Email, user.PasswordHash, user.AccessCode, user.Role))
+            new UserDto(user.FirstName, user.LastName, user.Email, user.PasswordHash, user.AccessCode, user.Role, user.MaxCompanions))
             .ToList();
     }
 
@@ -80,7 +80,7 @@ public class UserService : IUserService
             return null;
         }
 
-        return new UserDto(user.FirstName, user.LastName, user.Email, user.PasswordHash, user.AccessCode, user.Role);
+        return new UserDto(user.FirstName, user.LastName, user.Email, user.PasswordHash, user.AccessCode, user.Role, user.MaxCompanions);
     }
 
     private async Task<string> GenerateAccessCode(int length = 6)
