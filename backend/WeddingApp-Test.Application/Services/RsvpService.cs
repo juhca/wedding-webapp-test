@@ -81,23 +81,20 @@ public class RsvpService : IRsvpService
             existingRsvp.WantsReminder = dto.WantsReminder;
             existingRsvp.RespondedAt = DateTime.UtcNow;
             existingRsvp.UpdatedAt = DateTime.UtcNow;
+            existingRsvp.DietaryRestrictions = dto.DietaryRestrictions;
             
-            if (user.Role == UserRole.FullExperience)
+            existingRsvp.Companions.Clear(); // Remove old companions then add new
+            existingRsvp.Companions = dto.Companions.Select(c => new GuestCompanion
             {
-                existingRsvp.Companions.Clear(); // Remove old companions then add new
-                existingRsvp.Companions = dto.Companions.Select(c => new GuestCompanion
-                {
-                    Id = Guid.NewGuid(),
-                    RsvpId = existingRsvp.Id,
-                    FirstName = c.FirstName,
-                    LastName = c.LastName,
-                    Age = c.Age,
-                    DietaryRestrictions = c.DietaryRestrictions,
-                    Notes = c.Notes,
-                    CreatedAt = DateTime.UtcNow
-                }).ToList();
-                existingRsvp.DietaryRestrictions = dto.DietaryRestrictions;
-            }
+                Id = Guid.NewGuid(),
+                RsvpId = existingRsvp.Id,
+                FirstName = c.FirstName,
+                LastName = c.LastName,
+                Age = c.Age,
+                DietaryRestrictions = c.DietaryRestrictions,
+                Notes = c.Notes,
+                CreatedAt = DateTime.UtcNow
+            }).ToList();
 
             rsvp = existingRsvp;
             _rsvpRepository.Update(rsvp);
