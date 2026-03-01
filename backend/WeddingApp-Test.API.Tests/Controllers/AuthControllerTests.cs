@@ -17,16 +17,10 @@ namespace WeddingApp_Test.API.Tests.Controllers;
 /// These tests verify the entire authentication flow from HTTP request to database.
 /// </summary>
 [Trait("Category", "AuthController Integration Tests")]
-public class AuthControllerTests : IClassFixture<WeddingAppWebApplicationFactory>
+public class AuthControllerTests(WeddingAppWebApplicationFactory factory)
+	: IClassFixture<WeddingAppWebApplicationFactory>
 {
-	private readonly WeddingAppWebApplicationFactory _factory;
-	private readonly HttpClient _client;
-
-	public AuthControllerTests(WeddingAppWebApplicationFactory factory)
-	{
-		_factory = factory;
-		_client = factory.CreateClient();
-	}
+	private readonly HttpClient _client = factory.CreateClient();
 
 	#region AdminLoginTests
 
@@ -264,7 +258,7 @@ public class AuthControllerTests : IClassFixture<WeddingAppWebApplicationFactory
 		await _client.PostAsJsonAsync("/api/Auth/GuestLogin", loginRequest);
 
 		// Assert - Verify multiple refresh tokens were created
-		using var scope = _factory.Services.CreateScope();
+		using var scope = factory.Services.CreateScope();
 		var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
 		var user = await db.Users
@@ -542,7 +536,7 @@ public class AuthControllerTests : IClassFixture<WeddingAppWebApplicationFactory
 	/// </summary>
 	private async Task SeedDatabase(Action<AppDbContext> seedAction)
     {
-        using var scope = _factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         
         seedAction(db);

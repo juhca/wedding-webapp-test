@@ -31,6 +31,7 @@ else
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IWeddingInfoRepository, WeddingInfoRepository>();
+builder.Services.AddScoped<IRsvpRepository, RsvpRepository>();
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -38,6 +39,8 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IWeddingInfoService, WeddingInfoService>();
+builder.Services.AddScoped<IRsvpService, RsvpService>();
+
 
 // AutoMapper
 builder.Services.AddAutoMapper(

@@ -17,7 +17,7 @@ public class WeddingInfoRepository(AppDbContext context) : IWeddingInfoRepositor
     public async Task CreateAsync(WeddingInfo weddingInfo)
     {
         weddingInfo.CreatedAt = DateTime.UtcNow;
-        await  context.WeddingInfo.AddAsync(weddingInfo);
+        await context.WeddingInfo.AddAsync(weddingInfo);
         await context.SaveChangesAsync();
     }
 
