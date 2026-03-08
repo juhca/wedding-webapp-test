@@ -38,7 +38,7 @@ public class Gift
     public DateTime? UpdatedAt { get; set; }
     
     // Display
-    public int DisplayOrder { get; set; }
+    public int DisplayOrder { get; set; } // For display order on the ui
     public bool IsVisible { get; set; } = true;
     
     // COMPUTED PROPERTIES (don't save to DB)

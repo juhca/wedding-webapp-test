@@ -1,92 +1,130 @@
-﻿using WeddingApp_Test.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
+using WeddingApp_Test.Infrastructure.Persistence;
 
 namespace WeddingApp_Test.Infrastructure.Repositories;
 
-public class GiftRepository : IGiftRepository
+public class GiftRepository(AppDbContext context) : IGiftRepository
 {
-    public Task<Gift?> GetByIdAsync(Guid id)
+    public async Task<Gift?> GetByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        return await context.Gifts.FindAsync(id);
     }
 
-    public Task<Gift?> GetByIdWithReservationsAsync(Guid id)
+    public async Task<Gift?> GetByIdWithReservationsAsync(Guid id)
     {
-        throw new NotImplementedException();
+        return await context.Gifts
+            .Include(g => g.Reservations)
+                .ThenInclude(r => r.ReservedBy)
+            .FirstOrDefaultAsync(g => g.Id == id);
     }
 
-    public Task<IEnumerable<Gift>> GetAllAsync()
+    public async Task<IEnumerable<Gift>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return await context.Gifts
+            .Include(g => g.Reservations)
+                .ThenInclude(r => r.ReservedBy)
+            .OrderBy(g => g.DisplayOrder)
+            .ThenBy(g => g.Name)
+            .ToListAsync();
     }
 
-    public Task<IEnumerable<Gift>> GetVisibleAsync()
+    public async Task<IEnumerable<Gift>> GetVisibleAsync()
     {
-        throw new NotImplementedException();
+        return await context.Gifts
+            .Include(g => g.Reservations)
+                .ThenInclude(r => r.ReservedBy)
+            .Where(g => g.IsVisible)
+            .OrderBy(g => g.DisplayOrder)
+            .ThenBy(g => g.Name)
+            .ToListAsync();
     }
 
-    public Task<IEnumerable<Gift>> GetAvailableAsync()
+    public async Task<IEnumerable<Gift>> GetAvailableAsync()
     {
-        throw new NotImplementedException();
+        return await context.Gifts
+            .Include(g => g.Reservations)
+                .ThenInclude(r => r.ReservedBy)
+            .Where(g => g.IsVisible && (!g.MaxReservations.HasValue || // Unlimited
+                                        g.Reservations.Count < g.MaxReservations.Value)) // Has slots
+            .OrderBy(g => g.DisplayOrder)
+            .ThenBy(g => g.Name)
+            .ToListAsync();
     }
 
-    public Task<IEnumerable<Gift>> GetFullyReservedAsync()
+    public async Task<IEnumerable<Gift>> GetFullyReservedAsync()
     {
-        throw new NotImplementedException();
+        return await context.Gifts
+            .Include(g => g.Reservations)
+                .ThenInclude(r => r.ReservedBy)
+            .Where(g => g.IsFullyReserved)
+            .OrderBy(g => g.DisplayOrder)
+            .ToListAsync();
     }
 
-    public Task<IEnumerable<Gift>> GetReservedByUserAsync(Guid userId)
+    public async Task<IEnumerable<Gift>> GetReservedByUserAsync(Guid userId)
     {
-        throw new NotImplementedException();
+        return await context.Gifts
+            .Include(g => g.Reservations)
+            .Where(g => g.Reservations.Any(r => r.ReservedByUserId == userId))
+            .ToListAsync();
     }
 
-    public Task AddAsync(Gift gift)
+    public async Task AddAsync(Gift gift)
     {
-        throw new NotImplementedException();
+        await context.Gifts.AddAsync(gift);
     }
 
     public void Update(Gift gift)
     {
-        throw new NotImplementedException();
+        context.Gifts.Update(gift);
     }
 
     public void Delete(Gift gift)
     {
-        throw new NotImplementedException();
+        context.Gifts.Remove(gift);
     }
 
-    public Task<GiftReservation?> GetReservationAsync(Guid reservationId)
+    // Reservation methods
+    public async Task<GiftReservation?> GetReservationAsync(Guid reservationId)
     {
-        throw new NotImplementedException();
+        return await context.GiftReservations
+            .Include(r => r.Gift)
+            .Include(r => r.ReservedBy)
+            .FirstOrDefaultAsync(r => r.Id == reservationId);
     }
 
-    public Task<GiftReservation?> GetUserReservationForGiftAsync(Guid giftId, Guid userId)
+    public async Task<GiftReservation?> GetUserReservationForGiftAsync(Guid giftId, Guid userId)
     {
-        throw new NotImplementedException();
+        return await context.GiftReservations
+            .FirstOrDefaultAsync(r => r.GiftId == giftId && r.ReservedByUserId == userId);
     }
 
-    public Task AddReservationAsync(GiftReservation reservation)
+    public async Task AddReservationAsync(GiftReservation reservation)
     {
-        throw new NotImplementedException();
+        await context.GiftReservations.AddAsync(reservation);
     }
 
-    public void DeleteReservation(GiftReservation reservation)
+    public async void DeleteReservation(GiftReservation reservation)
     {
-        throw new NotImplementedException();
+        context.GiftReservations.Remove(reservation);
     }
 
-    public Task<bool> HasUserReservedGiftAsync(Guid giftId, Guid userId)
+    public async Task<bool> HasUserReservedGiftAsync(Guid giftId, Guid userId)
     {
-        throw new NotImplementedException();
+        return await  context.GiftReservations
+            .AnyAsync(r => r.GiftId == giftId && r.ReservedByUserId == userId);
     }
 
-    public Task<int> GetReservationCountAsync(Guid giftId)
+    public async Task<int> GetReservationCountAsync(Guid giftId)
     {
-        throw new NotImplementedException();
+        return await  context.GiftReservations
+            .CountAsync(r => r.GiftId == giftId);
     }
 
-    public Task<int> SaveChangesAsync()
+    public async Task<int> SaveChangesAsync()
     {
-        throw new NotImplementedException();
+        return await context.SaveChangesAsync();
     }
 }
