@@ -174,4 +174,6 @@ public class GiftsController(IGiftService giftService) : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+    
+    // TODO(TOMAS): import gifts by json/excel/csv
 }
