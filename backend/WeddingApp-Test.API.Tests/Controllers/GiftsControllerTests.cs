@@ -911,6 +911,336 @@ public class GiftsControllerTests(WeddingAppWebApplicationFactory factory)
     }
     #endregion
     
+    #region IMPORT TESTS
+    [Fact]
+    public async Task ImportJson_AsAdmin_WithValidGifts_ReturnsSuccessResult()
+    {
+        await factory.ResetDatabaseAsync();
+
+        // Arrange
+        var email = "admin@wedding.com";
+        var password = "SecurePassword123";
+
+        await SeedDatabase(db =>
+        {
+            var admin = TestDataBuilder.CreateAdminUser(email, password);
+            db.Users.Add(admin);
+        });
+
+        var loginRequest = new AdminLoginRequest(email, password);
+        var loginResponse = await _client.PostAsJsonAsync("/api/Auth/AdminLogin", loginRequest);
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        loginResponse.EnsureSuccessStatusCode();
+
+        var gifts = new List<CreateGiftDto>
+        {
+            new() { Name = "Coffee Maker", Price = 89.99m, MaxReservations = 1 },
+            new() { Name = "Toaster", Price = 49.99m, MaxReservations = 2 },
+            new() { Name = "Honeymoon Fund", MaxReservations = null },
+        };
+
+        // Act
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult!.Token);
+        var response = await _client.PostAsJsonAsync("/api/gifts/import", gifts);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<ImportGiftsResultDto>();
+
+        Assert.NotNull(result);
+        Assert.Equal(3, result.SuccessCount);
+        Assert.Equal(0, result.FailureCount);
+        Assert.Equal(3, result.ImportedGifts.Count);
+        Assert.Empty(result.Errors);
+        Assert.Contains(result.ImportedGifts, g => g.Name == "Coffee Maker");
+        Assert.Contains(result.ImportedGifts, g => g.Name == "Toaster");
+        Assert.Contains(result.ImportedGifts, g => g.Name == "Honeymoon Fund");
+    }
+
+    [Fact]
+    public async Task ImportJson_AsNonAdmin_ReturnsForbidden()
+    {
+        await factory.ResetDatabaseAsync();
+
+        // Arrange
+        var accessCode = "GUEST001";
+        await SeedDatabase(db =>
+        {
+            var guest = TestDataBuilder.CreateGuestUser(accessCode, UserRole.FullExperience);
+            db.Users.Add(guest);
+        });
+
+        var loginRequest = new GuestLoginRequest(accessCode);
+        var loginResponse = await _client.PostAsJsonAsync("/api/Auth/GuestLogin", loginRequest);
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        loginResponse.EnsureSuccessStatusCode();
+
+        var gifts = new List<CreateGiftDto> { new() { Name = "Unauthorized Gift" } };
+
+        // Act
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult!.Token);
+        var response = await _client.PostAsJsonAsync("/api/gifts/import", gifts);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ImportJson_WithInvalidGiftInList_ReturnsBadRequest()
+    {
+        await factory.ResetDatabaseAsync();
+
+        // Arrange
+        // ASP.NET [ApiController] validates every item in the list before the action runs,
+        // so a single invalid item rejects the entire request.
+        var email = "admin@wedding.com";
+        var password = "SecurePassword123";
+
+        await SeedDatabase(db =>
+        {
+            var admin = TestDataBuilder.CreateAdminUser(email, password);
+            db.Users.Add(admin);
+        });
+
+        var loginRequest = new AdminLoginRequest(email, password);
+        var loginResponse = await _client.PostAsJsonAsync("/api/Auth/AdminLogin", loginRequest);
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        loginResponse.EnsureSuccessStatusCode();
+
+        var gifts = new List<CreateGiftDto>
+        {
+            new() { Name = "Valid Gift", MaxReservations = 1 },
+            new() { Name = new string('A', 201), MaxReservations = 1 }, // exceeds MaxLength(200)
+        };
+
+        // Act
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult!.Token);
+        var response = await _client.PostAsJsonAsync("/api/gifts/import", gifts);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ImportCsv_WithSomeInvalidRows_ReturnsPartialSuccess()
+    {
+        await factory.ResetDatabaseAsync();
+
+        // Arrange
+        // CSV rows bypass ASP.NET model binding, so the service validates per-row
+        // and continues after failures, returning a partial-success result.
+        var email = "admin@wedding.com";
+        var password = "SecurePassword123";
+
+        await SeedDatabase(db =>
+        {
+            var admin = TestDataBuilder.CreateAdminUser(email, password);
+            db.Users.Add(admin);
+        });
+
+        var loginRequest = new AdminLoginRequest(email, password);
+        var loginResponse = await _client.PostAsJsonAsync("/api/Auth/AdminLogin", loginRequest);
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        loginResponse.EnsureSuccessStatusCode();
+
+        var longName = new string('A', 201); // exceeds MaxLength(200)
+        var csv = $"Name,Price,MaxReservations\n" +
+                  $"Valid Gift,50.00,1\n" +
+                  $"{longName},99.99,1\n" +
+                  $"Another Valid Gift,30.00,2";
+
+        // Act
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult!.Token);
+        var response = await _client.PostAsync("/api/gifts/import/csv", BuildCsvFormData(csv));
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<ImportGiftsResultDto>();
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.SuccessCount);
+        Assert.Equal(1, result.FailureCount);
+        Assert.Equal(2, result.ImportedGifts.Count);
+        Assert.Single(result.Errors);
+        Assert.Equal(2, result.Errors[0].Row);
+        Assert.Contains(result.ImportedGifts, g => g.Name == "Valid Gift");
+        Assert.Contains(result.ImportedGifts, g => g.Name == "Another Valid Gift");
+    }
+
+    [Fact]
+    public async Task ImportCsv_AsAdmin_WithValidCsv_ReturnsSuccessResult()
+    {
+        await factory.ResetDatabaseAsync();
+
+        // Arrange
+        var email = "admin@wedding.com";
+        var password = "SecurePassword123";
+
+        await SeedDatabase(db =>
+        {
+            var admin = TestDataBuilder.CreateAdminUser(email, password);
+            db.Users.Add(admin);
+        });
+
+        var loginRequest = new AdminLoginRequest(email, password);
+        var loginResponse = await _client.PostAsJsonAsync("/api/Auth/AdminLogin", loginRequest);
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        loginResponse.EnsureSuccessStatusCode();
+
+        var csv = "Name,Description,Price,MaxReservations,DisplayOrder,IsVisible\n" +
+                  "Coffee Maker,A nice machine,89.99,1,1,true\n" +
+                  "Toaster,For bread,49.99,2,2,true";
+
+        // Act
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult!.Token);
+        var response = await _client.PostAsync("/api/gifts/import/csv", BuildCsvFormData(csv));
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<ImportGiftsResultDto>();
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.SuccessCount);
+        Assert.Equal(0, result.FailureCount);
+        Assert.Equal(2, result.ImportedGifts.Count);
+        Assert.Contains(result.ImportedGifts, g => g.Name == "Coffee Maker");
+        Assert.Contains(result.ImportedGifts, g => g.Name == "Toaster");
+    }
+
+    [Fact]
+    public async Task ImportCsv_AsNonAdmin_ReturnsForbidden()
+    {
+        await factory.ResetDatabaseAsync();
+
+        // Arrange
+        var accessCode = "GUEST001";
+        await SeedDatabase(db =>
+        {
+            var guest = TestDataBuilder.CreateGuestUser(accessCode, UserRole.FullExperience);
+            db.Users.Add(guest);
+        });
+
+        var loginRequest = new GuestLoginRequest(accessCode);
+        var loginResponse = await _client.PostAsJsonAsync("/api/Auth/GuestLogin", loginRequest);
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        loginResponse.EnsureSuccessStatusCode();
+
+        // Act
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult!.Token);
+        var response = await _client.PostAsync("/api/gifts/import/csv", BuildCsvFormData("Name\nGift"));
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ImportCsv_WithEmptyFile_ReturnsBadRequest()
+    {
+        await factory.ResetDatabaseAsync();
+
+        // Arrange
+        var email = "admin@wedding.com";
+        var password = "SecurePassword123";
+
+        await SeedDatabase(db =>
+        {
+            var admin = TestDataBuilder.CreateAdminUser(email, password);
+            db.Users.Add(admin);
+        });
+
+        var loginRequest = new AdminLoginRequest(email, password);
+        var loginResponse = await _client.PostAsJsonAsync("/api/Auth/AdminLogin", loginRequest);
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        loginResponse.EnsureSuccessStatusCode();
+
+        // Act
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult!.Token);
+        var response = await _client.PostAsync("/api/gifts/import/csv", BuildCsvFormData(string.Empty));
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ImportCsv_WithMissingNameColumn_ReturnsBadRequest()
+    {
+        await factory.ResetDatabaseAsync();
+
+        // Arrange
+        var email = "admin@wedding.com";
+        var password = "SecurePassword123";
+
+        await SeedDatabase(db =>
+        {
+            var admin = TestDataBuilder.CreateAdminUser(email, password);
+            db.Users.Add(admin);
+        });
+
+        var loginRequest = new AdminLoginRequest(email, password);
+        var loginResponse = await _client.PostAsJsonAsync("/api/Auth/AdminLogin", loginRequest);
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        loginResponse.EnsureSuccessStatusCode();
+
+        var csv = "Description,Price\nA gift,50.00";
+
+        // Act
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult!.Token);
+        var response = await _client.PostAsync("/api/gifts/import/csv", BuildCsvFormData(csv));
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var errorContent = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Name", errorContent);
+    }
+
+    [Fact]
+    public async Task ImportCsv_WithQuotedFieldContainingComma_ParsesCorrectly()
+    {
+        await factory.ResetDatabaseAsync();
+
+        // Arrange
+        var email = "admin@wedding.com";
+        var password = "SecurePassword123";
+
+        await SeedDatabase(db =>
+        {
+            var admin = TestDataBuilder.CreateAdminUser(email, password);
+            db.Users.Add(admin);
+        });
+
+        var loginRequest = new AdminLoginRequest(email, password);
+        var loginResponse = await _client.PostAsJsonAsync("/api/Auth/AdminLogin", loginRequest);
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+        loginResponse.EnsureSuccessStatusCode();
+
+        var csv = "Name,Description\n" +
+                  "\"Coffee, Espresso Machine\",\"A luxurious, high-end machine\"";
+
+        // Act
+        _client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult!.Token);
+        var response = await _client.PostAsync("/api/gifts/import/csv", BuildCsvFormData(csv));
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<ImportGiftsResultDto>();
+
+        Assert.NotNull(result);
+        Assert.Equal(1, result.SuccessCount);
+        Assert.Equal(0, result.FailureCount);
+        Assert.Contains(result.ImportedGifts, g => g.Name == "Coffee, Espresso Machine");
+        Assert.Contains(result.ImportedGifts, g => g.Description == "A luxurious, high-end machine");
+    }
+    #endregion
+
     #region HelperMethods
     /// <summary>
     /// Helper method to seed the database with test data.
@@ -920,9 +1250,19 @@ public class GiftsControllerTests(WeddingAppWebApplicationFactory factory)
     {
         using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        
+
         seedAction(db);
         await db.SaveChangesAsync();
+    }
+
+    private static MultipartFormDataContent BuildCsvFormData(string csvContent, string fileName = "gifts.csv")
+    {
+        var formData = new MultipartFormDataContent();
+        var fileBytes = System.Text.Encoding.UTF8.GetBytes(csvContent);
+        var fileContent = new ByteArrayContent(fileBytes);
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/csv");
+        formData.Add(fileContent, "file", fileName);
+        return formData;
     }
     #endregion
 }
