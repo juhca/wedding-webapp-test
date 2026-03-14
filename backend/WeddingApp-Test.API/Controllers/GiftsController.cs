@@ -175,5 +175,44 @@ public class GiftsController(IGiftService giftService) : ControllerBase
         }
     }
     
-    // TODO(TOMAS): import gifts by json/excel/csv
+    /// <summary>
+    /// Import gifts from a JSON array (Admin only)
+    /// </summary>
+    [HttpPost("import")]
+    [Authorize(Roles = nameof(UserRole.Admin))]
+    [ProducesResponseType(typeof(ImportGiftsResultDto), 200)]
+    public async Task<IActionResult> ImportJson([FromBody] List<CreateGiftDto> dtos)
+    {
+        var result = await giftService.ImportGiftsAsync(dtos);
+        
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Import gifts from a CSV file (Admin only).
+    /// Expected headers: Name, Description, Price, ImageUrl, PurchaseLink, MaxReservations, DisplayOrder, IsVisible
+    /// Field values containing commas must be wrapped in double quotes.
+    /// </summary>
+    [HttpPost("import/csv")]
+    [Authorize(Roles = nameof(UserRole.Admin))]
+    [ProducesResponseType(typeof(ImportGiftsResultDto), 200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> ImportCsv(IFormFile file)
+    {
+        if (file.Length == 0)
+        {
+            return BadRequest("File is empty");
+        }
+
+        try
+        {
+            var result = await giftService.ImportGiftsCsvAsync(file);
+            
+            return Ok(result);
+        }
+        catch (InvalidOperationException  ex)
+        {
+            return BadRequest($"CSV parsing error: {ex.Message}");
+        }
+    }
 }

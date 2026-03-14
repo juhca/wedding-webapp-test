@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.ComponentModel.DataAnnotations;
+using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using WeddingApp_Test.Application.DTO.Gift;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
@@ -186,5 +188,135 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
         }
 
         return dtos;
+    }
+
+    public async Task<ImportGiftsResultDto> ImportGiftsAsync(IEnumerable<CreateGiftDto> dtos)
+    {
+        var result = new ImportGiftsResultDto();
+        var row = 0;
+
+        foreach (var dto in dtos)
+        {
+            row++;
+            var validationContext = new ValidationContext(dto);
+            var validationResults = new List<ValidationResult>();
+
+            if (!Validator.TryValidateObject(dto, validationContext, validationResults, validateAllProperties: true))
+            {
+                var errors = string.Join("; ", validationResults.Select(r => r.ErrorMessage));
+                result.FailureCount++;
+                result.Errors.Add(new ImportGiftErrorDto { Row = row, GiftName = dto.Name, Error = errors });
+                continue;
+            }
+
+            try
+            {
+                var gift = await CreateAsync(dto);
+                result.ImportedGifts.Add(gift);
+                result.SuccessCount++;
+            }
+            catch (Exception ex)
+            {
+                result.FailureCount++;
+                result.Errors.Add(new ImportGiftErrorDto { Row = row, GiftName = dto.Name, Error = ex.Message });
+            }
+        }
+
+        return result;
+    }
+
+    public Task<ImportGiftsResultDto> ImportGiftsCsvAsync(IFormFile file)
+    {
+        var csvGift = ParseCsvFile(file);
+        var importGift = ImportGiftsAsync(csvGift);
+        
+        return importGift;
+    }
+
+    private List<CreateGiftDto> ParseCsvFile(IFormFile file)
+    {
+        using var reader = new StreamReader(file.OpenReadStream());
+
+        var headerLine = reader.ReadLine()
+            ?? throw new InvalidOperationException("CSV file is missing a header row");
+
+        var headers = SplitCsvLine(headerLine)
+            .Select(h => h.ToLowerInvariant())
+            .ToArray();
+
+        int Col(params string[] names) =>
+            names.Select(n => Array.IndexOf(headers, n)).FirstOrDefault(i => i >= 0, -1);
+
+        var nameIdx    = Col("name");
+        if (nameIdx < 0) throw new InvalidOperationException("CSV must contain a 'Name' column");
+
+        var descIdx    = Col("description");
+        var priceIdx   = Col("price");
+        var imageIdx   = Col("imageurl", "image_url");
+        var linkIdx    = Col("purchaselink", "purchase_link");
+        var maxResIdx  = Col("maxreservations", "max_reservations");
+        var orderIdx   = Col("displayorder", "display_order");
+        var visibleIdx = Col("isvisible", "is_visible");
+
+        var dtos = new List<CreateGiftDto>();
+        string? line;
+
+        while ((line = reader.ReadLine()) is not null)
+        {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            var cols = SplitCsvLine(line);
+            string? Get(int idx) => idx >= 0 && idx < cols.Length ? cols[idx] : null;
+
+            dtos.Add(new CreateGiftDto
+            {
+                Name             = Get(nameIdx) ?? string.Empty,
+                Description      = Get(descIdx),
+                Price            = decimal.TryParse(Get(priceIdx), out var price) ? price : null,
+                ImageUrl         = Get(imageIdx),
+                PurchaseLink     = Get(linkIdx),
+                MaxReservations  = int.TryParse(Get(maxResIdx), out var maxRes) ? maxRes : 1,
+                DisplayOrder     = int.TryParse(Get(orderIdx), out var order) ? order : 0,
+                IsVisible        = !bool.TryParse(Get(visibleIdx), out var vis) || vis,
+            });
+        }
+
+        return dtos;
+    }
+
+    private string[] SplitCsvLine(string line)
+    {
+        var result   = new List<string>();
+        var current  = new System.Text.StringBuilder();
+        var inQuotes = false;
+
+        for (var i = 0; i < line.Length; i++)
+        {
+            var c = line[i];
+            if (c == '"')
+            {
+                if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                {
+                    current.Append('"');
+                    i++;
+                }
+                else
+                {
+                    inQuotes = !inQuotes;
+                }
+            }
+            else if (c == ',' && !inQuotes)
+            {
+                result.Add(current.ToString().Trim());
+                current.Clear();
+            }
+            else
+            {
+                current.Append(c);
+            }
+        }
+
+        result.Add(current.ToString().Trim());
+        return result.ToArray();
     }
 }

@@ -1,4 +1,5 @@
-﻿using WeddingApp_Test.Application.DTO.Gift;
+﻿using Microsoft.AspNetCore.Http;
+using WeddingApp_Test.Application.DTO.Gift;
 
 namespace WeddingApp_Test.Application.Interfaces;
 
@@ -12,4 +13,6 @@ public interface IGiftService
     Task<GiftReservationConfirmationDto> ReserveGiftAsync(Guid giftId, Guid userId, ReserveGiftDto dto);
     Task UnreserveGiftAsync(Guid giftId, Guid userId);
     Task<IEnumerable<GiftDto>> GetMyReservedGiftsAsync(Guid userId);
+    Task<ImportGiftsResultDto> ImportGiftsAsync(IEnumerable<CreateGiftDto> dtos);
+    Task<ImportGiftsResultDto> ImportGiftsCsvAsync(IFormFile file);
 }
