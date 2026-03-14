@@ -21,5 +21,18 @@
     &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.RsvpControllerTests.GetSummary_AsAdmin_ReturnsStatistics&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.RsvpControllerTests.ExportCatering_AsAdmin_ReturnsCsvFile&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.RsvpControllerTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.GetAllGifts_WhenNotAuthenticated_ReturnsUnauthorized&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.GetAllGifts_AsAuthenticatedUser_ReturnsVisibleGifts&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.GetGiftById_ExistingGift_ReturnsGift&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.GetGiftById_NonExistentGift_ReturnsNotFound&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.GetMyReservations_ReturnsOnlyMyReservedGifts&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.ReserveGift_SingleUse_Success&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.ReserveGift_MultiUse_Success&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.ReserveGift_AlreadyFullyReserved_ReturnsBadRequest&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.ReserveGift_UserAlreadyReserved_ReturnsBadRequest&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.ReserveGift_NonExistentGift_ReturnsNotFound&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.UnreserveGift_Success&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.UnreserveGift_NotReservedByUser_ReturnsNotFound&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

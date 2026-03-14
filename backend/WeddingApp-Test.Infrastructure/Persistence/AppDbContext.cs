@@ -10,6 +10,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 	public DbSet<WeddingInfo> WeddingInfo => Set<WeddingInfo>();
 	public DbSet<Rsvp> Rsvps => Set<Rsvp>();
 	public DbSet<GuestCompanion> GuestCompanions => Set<GuestCompanion>();
+	public DbSet<Gift> Gifts => Set<Gift>();
+	public DbSet<GiftReservation> GiftReservations => Set<GiftReservation>();
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -108,6 +110,48 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 				.OnDelete(DeleteBehavior.Cascade); // Delete companions when RSVP is deleted
 			
 			entity.HasIndex(gc => gc.RsvpId);
+		});
+		
+		// GIFT CONFIGURATION
+		modelBuilder.Entity<Gift>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+            
+			entity.HasIndex(g => g.DisplayOrder);
+			entity.HasIndex(g => g.IsVisible);
+            
+			// Decimal precision for price
+			entity.Property(g => g.Price).HasPrecision(10, 2);
+            
+			// Ignore computed properties (don't save to DB)
+			entity.Ignore(g => g.ReservationCount);
+			entity.Ignore(g => g.IsFullyReserved);
+			entity.Ignore(g => g.RemainingReservations);
+		});
+        
+		// GIFT RESERVATION CONFIGURATION
+		modelBuilder.Entity<GiftReservation>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+            
+			// Many reservations belong to one gift
+			entity.HasOne(gr => gr.Gift)
+				.WithMany(g => g.Reservations)
+				.HasForeignKey(gr => gr.GiftId)
+				.OnDelete(DeleteBehavior.Cascade); // Delete reservations when gift is deleted
+            
+			// Many reservations belong to one user
+			entity.HasOne(gr => gr.ReservedBy)
+				.WithMany()
+				.HasForeignKey(gr => gr.ReservedByUserId)
+				.OnDelete(DeleteBehavior.Cascade); // Don't delete reservations when user is deleted
+            
+			entity.HasIndex(gr => gr.GiftId);
+			entity.HasIndex(gr => gr.ReservedByUserId);
+			entity.HasIndex(gr => gr.ReservedAt);
+            
+			// UNIQUE CONSTRAINT - user can reserve same gift only once
+			entity.HasIndex(gr => new { gr.GiftId, gr.ReservedByUserId }).IsUnique();
 		});
 	}
 }

@@ -32,6 +32,8 @@ else
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IWeddingInfoRepository, WeddingInfoRepository>();
 builder.Services.AddScoped<IRsvpRepository, RsvpRepository>();
+builder.Services.AddScoped<IGiftRepository, GiftRepository>();
+
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -40,6 +42,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IWeddingInfoService, WeddingInfoService>();
 builder.Services.AddScoped<IRsvpService, RsvpService>();
+builder.Services.AddScoped<IGiftService, GiftService>();
 
 
 // AutoMapper
