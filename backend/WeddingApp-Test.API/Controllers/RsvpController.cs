@@ -11,15 +11,8 @@ namespace WeddingApp_Test.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class RsvpController : ControllerBase
+public class RsvpController(IRsvpService rsvpService) : ControllerBase
 {
-    private readonly IRsvpService _rsvpService;
-    
-    public RsvpController(IRsvpService rsvpService)
-    {
-        _rsvpService = rsvpService;
-    }
-    
     /// <summary>
     /// Get RSVP of logged-in user
     /// </summary>
@@ -28,7 +21,7 @@ public class RsvpController : ControllerBase
     public async Task<IActionResult> GetUserRsvp()
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var rsvp = await _rsvpService.GetUserRsvpAsync(userId);
+        var rsvp = await rsvpService.GetUserRsvpAsync(userId);
         
         return Ok(rsvp);
     }
@@ -44,7 +37,7 @@ public class RsvpController : ControllerBase
         try
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var rsvp = await _rsvpService.CreateOrUpdateRsvpAsync(userId, dto);
+            var rsvp = await rsvpService.CreateOrUpdateRsvpAsync(userId, dto);
             
             return Ok(rsvp);
         }
@@ -62,7 +55,7 @@ public class RsvpController : ControllerBase
     [ProducesResponseType(typeof(RsvpSummaryDto), 200)]
     public async Task<IActionResult> GetSummary()
     {
-        var summary = await _rsvpService.GetSummaryAsync();
+        var summary = await rsvpService.GetSummaryAsync();
         
         return Ok(summary);
     }
@@ -75,7 +68,7 @@ public class RsvpController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<RsvpWithUserDto>), 200)]
     public async Task<IActionResult> GetAll()
     {
-        var rsvps = await _rsvpService.GetAllWithUsersAsync();
+        var rsvps = await rsvpService.GetAllWithUsersAsync();
         
         return Ok(rsvps);
     }
@@ -85,7 +78,7 @@ public class RsvpController : ControllerBase
     [ProducesResponseType(typeof(FileContentResult), 200)]
     public async Task<IActionResult> ExportForCatering()
     {
-        var data = await _rsvpService.ExportForCateringAsync();
+        var data = await rsvpService.ExportForCateringAsync();
         var csv = new StringBuilder();
         csv.AppendLine("GuestType,FirstName,LastName,Age,DietaryRestrictions,Notes,MainGuestEmail");
 

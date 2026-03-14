@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using WeddingApp_Test.Application.DTO.Gift;
 using WeddingApp_Test.Application.DTO.Rsvp;
 using WeddingApp_Test.Application.DTO.WeddingInfo;
 using WeddingApp_Test.Domain.Entities;
@@ -56,5 +57,34 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.Rsvp, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+        
+        // GIFT MAPPINGS
+        CreateMap<Gift, GiftDto>()
+            .ForMember(dest => dest.IsReservedByMe, opt => opt.Ignore())
+            .ForMember(dest => dest.ReservationStatus, opt => opt.Ignore());
+        
+        
+        CreateMap<CreateGiftDto, Gift>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Reservations, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ReservationCount, opt => opt.Ignore())
+            .ForMember(dest => dest.IsFullyReserved, opt => opt.Ignore())
+            .ForMember(dest => dest.RemainingReservations, opt => opt.Ignore());
+
+        CreateMap<UpdateGiftDto, Gift>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Reservations, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ReservationCount, opt => opt.Ignore())
+            .ForMember(dest => dest.IsFullyReserved, opt => opt.Ignore())
+            .ForMember(dest => dest.RemainingReservations, opt => opt.Ignore());
+
+        // GIFT RESERVATION MAPPINGS
+        CreateMap<GiftReservation, GiftReservationDto>()
+            .ForMember(dest => dest.ReservedByName, opt => opt.MapFrom(src =>
+                $"{src.ReservedBy.FirstName} {src.ReservedBy.LastName}"));
     }
 }
