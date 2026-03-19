@@ -7,7 +7,7 @@ using WeddingApp_Test.Domain.Entities;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IMapper mapper, IEmailService emailService) : IGiftService
+public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IMapper mapper, IEmailDispatchService emailDispatch) : IGiftService
 {
     public async Task<IEnumerable<GiftDto>> GetAllVisibleAsync(Guid? currentUserId = null)
     {
@@ -143,7 +143,9 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
 
         reservation.Gift = gift!;
         reservation.ReservedBy = user;
-        _ = emailService.SendGiftReservedAsync(user, gift!, reservation);
+        _ = emailDispatch.DispatchEventAsync("GiftReserved", user, new Dictionary<string, object?> {
+            ["gift"] = new { name = gift!.Name, price = gift.Price, purchaseLink = gift.PurchaseLink }
+        });
 
         return new GiftReservationConfirmationDto
         {
@@ -181,7 +183,9 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
         {
             var user = await userRepository.GetByIdAsync(userId);
             if (user is not null)
-                _ = emailService.SendGiftUnreservedAsync(user, gift);
+                _ = emailDispatch.DispatchEventAsync("GiftUnreserved", user, new Dictionary<string, object?> {
+                    ["gift"] = new { name = gift.Name }
+                });
         }
     }
 

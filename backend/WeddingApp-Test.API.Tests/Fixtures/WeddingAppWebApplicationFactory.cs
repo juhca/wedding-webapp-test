@@ -9,64 +9,44 @@ namespace WeddingApp_Test.API.Tests.Fixtures;
 
 /// <summary>
 /// Custom factory for creating test instances of the web application.
-/// This sets up an isolated environment with an in-memory database for each test.
-/// IEmailProvider is replaced with a no-op stub so no real emails are sent during tests.
+/// - In-memory database (isolated per factory instance)
+/// - IEmailProvider replaced with a no-op stub (no real emails sent)
+/// - IEmailDispatchService replaced with a no-op stub (fire-and-forget events don't send in tests)
+/// - EmailSchedulerService background service does not run in test environment
 /// </summary>
 public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
 {
-    // DB name is stored as a field, so it's created once per factory instance
-    // This ensures all DbContext instances (seeding, HTTP requests, etc.) share the SAME in-memory database.
-    //   \-> If we used Guid.NewGuid() directly in UseInMemoryDatabase(), it would create a NEW database
-    //      every time a DbContext is instantiated (seeding, each HTTP request, etc.)
     private readonly string _dbName = $"InMemoryTestDb_{Guid.NewGuid()}";
 
-    /// <summary>
-    /// Records all emails that would have been sent during the test run.
-    /// Inspect this in tests to verify email-sending behaviour.
-    /// </summary>
+    /// <summary>Captures all emails that would have been sent. Inspect in tests.</summary>
     public List<SentEmailRecord> SentEmails { get; } = [];
-    
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        // SET environment to Testing ~ to not execute data seeding
         builder.UseEnvironment("Testing");
         
         builder.ConfigureServices(services =>
         {
-            // Remove the existing DbContext registration
-            var descriptor = services
-                .SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+            // Replace DbContext with in-memory DB
+            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+            if (descriptor != null) services.Remove(descriptor);
 
-            if (descriptor != null)
-            {
-                services.Remove(descriptor);
-            }
+            services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(_dbName));
 
-            // Add DbContext using in-memory database for testing
-            // Each test will get a unique database name to avoid conflicts
-            services.AddDbContext<AppDbContext>(options =>
-            {
-                options.UseInMemoryDatabase(_dbName);
-            });
+            // Replace IEmailProvider with a no-op stub
+            RemoveAll<IEmailProvider>(services);
+            var emailStub = new StubEmailProvider(SentEmails);
+            services.AddSingleton<IEmailProvider>(emailStub);
+            services.AddKeyedSingleton<IEmailProvider>("resend", emailStub);
+            services.AddKeyedSingleton<IEmailProvider>("smtp",   emailStub);
 
-            // Replace IEmailProvider with a no-op stub — no real emails sent in tests
-            // Both the keyed ("resend", "smtp") and unkeyed registrations are replaced.
-            RemoveAllEmailProviders(services);
-            var stub = new StubEmailProvider(SentEmails);
-            services.AddSingleton<IEmailProvider>(stub);
-            services.AddKeyedSingleton<IEmailProvider>("resend", stub);
-            services.AddKeyedSingleton<IEmailProvider>("smtp", stub);
+            // Replace IEmailDispatchService with a no-op stub
+            RemoveAll<IEmailDispatchService>(services);
+            services.AddSingleton<IEmailDispatchService>(new StubEmailDispatchService());
 
-            // Build the service provider
-            var serviceProvider = services.BuildServiceProvider();
-
-            // Create a scope to obtain a reference to the database context
-            using var scope = serviceProvider.CreateScope();
-            var scopedServices = scope.ServiceProvider;
-            var db = scopedServices.GetRequiredService<AppDbContext>();
-
-            // Ensure the database is created
-            db.Database.EnsureCreated();
+            var sp = services.BuildServiceProvider();
+            using var scope = sp.CreateScope();
+            scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
         });
     }
     
@@ -75,27 +55,27 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
         using var scope = Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         
-        // Remove all data
         db.Users.RemoveRange(db.Users);
         db.Rsvps.RemoveRange(db.Rsvps);
         db.GuestCompanions.RemoveRange(db.GuestCompanions);
         db.WeddingInfo.RemoveRange(db.WeddingInfo);
         db.Gifts.RemoveRange(db.Gifts);
         db.GiftReservations.RemoveRange(db.GiftReservations);
+        db.EmailTemplates.RemoveRange(db.EmailTemplates);
+        db.EmailSchedules.RemoveRange(db.EmailSchedules);
+        db.EmailSendLogs.RemoveRange(db.EmailSendLogs);
         
         await db.SaveChangesAsync();
     }
 
-    private static void RemoveAllEmailProviders(IServiceCollection services)
+    private static void RemoveAll<T>(IServiceCollection services)
     {
-        var toRemove = services
-            .Where(d => d.ServiceType == typeof(IEmailProvider))
-            .ToList();
+        var toRemove = services.Where(d => d.ServiceType == typeof(T)).ToList();
         foreach (var d in toRemove) services.Remove(d);
     }
 }
 
-/// <summary>Captures emails instead of sending them — for use in tests.</summary>
+/// <summary>Records emails instead of sending them.</summary>
 public class StubEmailProvider(List<SentEmailRecord> log) : IEmailProvider
 {
     public Task SendAsync(string to, string subject, string htmlBody, CancellationToken ct = default)
@@ -103,6 +83,14 @@ public class StubEmailProvider(List<SentEmailRecord> log) : IEmailProvider
         log.Add(new SentEmailRecord(to, subject, htmlBody));
         return Task.CompletedTask;
     }
+}
+
+/// <summary>No-op dispatch service — domain events don't trigger emails in tests.</summary>
+public class StubEmailDispatchService : IEmailDispatchService
+{
+    public Task DispatchEventAsync(string eventName, WeddingApp_Test.Domain.Entities.User triggeringUser,
+        Dictionary<string, object?> extraContext, CancellationToken ct = default)
+        => Task.CompletedTask;
 }
 
 public record SentEmailRecord(string To, string Subject, string HtmlBody);

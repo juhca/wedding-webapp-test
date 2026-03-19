@@ -11,14 +11,14 @@ public class RsvpService : IRsvpService
     private readonly IRsvpRepository _rsvpRepository;
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
-    private readonly IEmailService _emailService;
+    private readonly IEmailDispatchService _emailDispatch;
     
-    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository, IMapper mapper, IEmailService emailService)
+    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository, IMapper mapper, IEmailDispatchService emailDispatch)
     {
         _rsvpRepository = rsvpRepository;
         _userRepository = userRepository;
         _mapper = mapper;
-        _emailService = emailService;
+        _emailDispatch = emailDispatch;
     }
     
     public async Task<RsvpDto?> GetUserRsvpAsync(Guid userId)
@@ -107,9 +107,9 @@ public class RsvpService : IRsvpService
         rsvp.User = user;
 
         if (existingRsvp is null)
-            _ = _emailService.SendRsvpConfirmationAsync(user, rsvp);
+            _ = _emailDispatch.DispatchEventAsync("RsvpSubmitted", user, new Dictionary<string, object?> { ["rsvp"] = new { isAttending = rsvp.IsAttending, companionCount = rsvp.Companions.Count } });
         else
-            _ = _emailService.SendRsvpUpdatedAsync(user, rsvp);
+            _ = _emailDispatch.DispatchEventAsync("RsvpUpdated", user, new Dictionary<string, object?> { ["rsvp"] = new { isAttending = rsvp.IsAttending, companionCount = rsvp.Companions.Count } });
 
         var result = _mapper.Map<RsvpDto>(rsvp);
         result.MaxCompanionsAllowed = maxCompanions;

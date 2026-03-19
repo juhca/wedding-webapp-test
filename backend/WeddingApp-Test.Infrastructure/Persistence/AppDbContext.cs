@@ -12,6 +12,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 	public DbSet<GuestCompanion> GuestCompanions => Set<GuestCompanion>();
 	public DbSet<Gift> Gifts => Set<Gift>();
 	public DbSet<GiftReservation> GiftReservations => Set<GiftReservation>();
+	public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
+	public DbSet<EmailSchedule> EmailSchedules => Set<EmailSchedule>();
+	public DbSet<EmailSendLog> EmailSendLogs => Set<EmailSendLog>();
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -152,6 +155,62 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             
 			// UNIQUE CONSTRAINT - user can reserve same gift only once
 			entity.HasIndex(gr => new { gr.GiftId, gr.ReservedByUserId }).IsUnique();
+		});
+
+		// EMAIL TEMPLATE CONFIGURATION
+		modelBuilder.Entity<EmailTemplate>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.Property(e => e.TriggerType).HasConversion<string>();
+			entity.Property(e => e.AudienceType).HasConversion<string>();
+			entity.Property(e => e.TargetRole).HasConversion<string>();
+			entity.HasIndex(e => e.IsActive);
+			entity.HasIndex(e => new { e.TriggerType, e.EventName });
+		});
+
+		// EMAIL SCHEDULE CONFIGURATION
+		modelBuilder.Entity<EmailSchedule>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+
+			entity.HasOne(e => e.Template)
+				.WithMany(t => t.Schedules)
+				.HasForeignKey(e => e.TemplateId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(e => e.User)
+				.WithMany()
+				.HasForeignKey(e => e.UserId)
+				.OnDelete(DeleteBehavior.Cascade)
+				.IsRequired(false);
+
+			entity.HasIndex(e => new { e.ScheduledFor, e.SentAt });
+			entity.HasIndex(e => e.UserId);
+		});
+
+		// EMAIL SEND LOG CONFIGURATION
+		modelBuilder.Entity<EmailSendLog>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+
+			entity.HasOne(e => e.Template)
+				.WithMany(t => t.SendLogs)
+				.HasForeignKey(e => e.TemplateId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(e => e.Schedule)
+				.WithMany(s => s.SendLogs)
+				.HasForeignKey(e => e.ScheduleId)
+				.OnDelete(DeleteBehavior.SetNull)
+				.IsRequired(false);
+
+			entity.HasOne(e => e.User)
+				.WithMany()
+				.HasForeignKey(e => e.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasIndex(e => new { e.TemplateId, e.UserId });
+			entity.HasIndex(e => e.SentAt);
 		});
 	}
 }

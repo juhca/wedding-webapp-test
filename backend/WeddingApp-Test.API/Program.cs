@@ -52,11 +52,14 @@ builder.Services.AddHttpClient<EmailProviderResend>();
 builder.Services.AddKeyedScoped<IEmailProvider, EmailProviderResend>("resend");
 builder.Services.AddKeyedScoped<IEmailProvider, EmailProviderSmtp>("smtp");
 builder.Services.AddScoped<IEmailProvider, EmailProviderFallback>();
-builder.Services.AddScoped<IEmailService, WeddingApp_Test.Application.Email.EmailService>();
+builder.Services.AddScoped<ILiquidRenderer, LiquidRenderer>();
+builder.Services.AddScoped<IEmailDispatchService, WeddingApp_Test.Infrastructure.Email.EmailDispatchService>();
+
+// Countdown image generation (singleton — font loaded once at startup)
+builder.Services.AddSingleton<WeddingApp_Test.API.Services.CountdownImageService>();
 
 // Background services
-builder.Services.AddHostedService<DailyAdminReportService>();
-builder.Services.AddHostedService<GuestReminderService>();
+builder.Services.AddHostedService<EmailSchedulerService>();
 
 
 // AutoMapper
