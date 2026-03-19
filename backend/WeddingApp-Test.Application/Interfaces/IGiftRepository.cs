@@ -18,6 +18,8 @@ public interface IGiftRepository
     // GiftReservation operations
     Task<GiftReservation?> GetReservationAsync(Guid reservationId);
     Task<GiftReservation?> GetUserReservationForGiftAsync(Guid giftId, Guid userId);
+    Task<IEnumerable<GiftReservation>> GetReservationsSinceAsync(DateTime since);
+    Task<IEnumerable<GiftReservation>> GetPendingGiftRemindersAsync(DateTime asOf);
     Task AddReservationAsync(GiftReservation reservation);
     void DeleteReservation(GiftReservation reservation);
     Task<bool> HasUserReservedGiftAsync(Guid giftId, Guid userId);

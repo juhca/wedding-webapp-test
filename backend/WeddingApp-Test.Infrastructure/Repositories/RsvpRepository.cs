@@ -135,6 +135,25 @@ public class RsvpRepository(AppDbContext context) : IRsvpRepository
     {
         return await context.Rsvps.AnyAsync(r => r.UserId == userId);
     }
+
+    public async Task<IEnumerable<Rsvp>> GetRespondedSinceAsync(DateTime since)
+    {
+        return await context.Rsvps
+            .Include(r => r.User)
+            .Include(r => r.Companions)
+            .Where(r => r.RespondedAt >= since || r.UpdatedAt >= since)
+            .OrderByDescending(r => r.RespondedAt)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Rsvp>> GetPendingWeddingRemindersAsync()
+    {
+        return await context.Rsvps
+            .Include(r => r.User)
+            .Include(r => r.Companions)
+            .Where(r => r.WantsReminder && r.ReminderSentAt == null && r.IsAttending)
+            .ToListAsync();
+    }
     
     public async Task<int> SaveChangesAsync()
     {

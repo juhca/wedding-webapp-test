@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Infrastructure.Persistence;
 
 namespace WeddingApp_Test.API.Tests.Fixtures;
@@ -9,6 +10,7 @@ namespace WeddingApp_Test.API.Tests.Fixtures;
 /// <summary>
 /// Custom factory for creating test instances of the web application.
 /// This sets up an isolated environment with an in-memory database for each test.
+/// IEmailProvider is replaced with a no-op stub so no real emails are sent during tests.
 /// </summary>
 public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
 {
@@ -17,6 +19,12 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
     //   \-> If we used Guid.NewGuid() directly in UseInMemoryDatabase(), it would create a NEW database
     //      every time a DbContext is instantiated (seeding, each HTTP request, etc.)
     private readonly string _dbName = $"InMemoryTestDb_{Guid.NewGuid()}";
+
+    /// <summary>
+    /// Records all emails that would have been sent during the test run.
+    /// Inspect this in tests to verify email-sending behaviour.
+    /// </summary>
+    public List<SentEmailRecord> SentEmails { get; } = [];
     
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -40,6 +48,14 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
             {
                 options.UseInMemoryDatabase(_dbName);
             });
+
+            // Replace IEmailProvider with a no-op stub — no real emails sent in tests
+            // Both the keyed ("resend", "smtp") and unkeyed registrations are replaced.
+            RemoveAllEmailProviders(services);
+            var stub = new StubEmailProvider(SentEmails);
+            services.AddSingleton<IEmailProvider>(stub);
+            services.AddKeyedSingleton<IEmailProvider>("resend", stub);
+            services.AddKeyedSingleton<IEmailProvider>("smtp", stub);
 
             // Build the service provider
             var serviceProvider = services.BuildServiceProvider();
@@ -69,4 +85,24 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
         
         await db.SaveChangesAsync();
     }
+
+    private static void RemoveAllEmailProviders(IServiceCollection services)
+    {
+        var toRemove = services
+            .Where(d => d.ServiceType == typeof(IEmailProvider))
+            .ToList();
+        foreach (var d in toRemove) services.Remove(d);
+    }
 }
+
+/// <summary>Captures emails instead of sending them — for use in tests.</summary>
+public class StubEmailProvider(List<SentEmailRecord> log) : IEmailProvider
+{
+    public Task SendAsync(string to, string subject, string htmlBody, CancellationToken ct = default)
+    {
+        log.Add(new SentEmailRecord(to, subject, htmlBody));
+        return Task.CompletedTask;
+    }
+}
+
+public record SentEmailRecord(string To, string Subject, string HtmlBody);

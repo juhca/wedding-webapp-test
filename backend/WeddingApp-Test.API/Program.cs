@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using WeddingApp_Test.API.BackgroundServices;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Application.Mappings;
 using WeddingApp_Test.Application.Services;
 using WeddingApp_Test.Infrastructure.Data;
+using WeddingApp_Test.Infrastructure.Email;
 using WeddingApp_Test.Infrastructure.Persistence;
 using WeddingApp_Test.Infrastructure.Repositories;
 
@@ -43,6 +45,18 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IWeddingInfoService, WeddingInfoService>();
 builder.Services.AddScoped<IRsvpService, RsvpService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
+
+// Email providers
+builder.Services.Configure<SmtpConfig>(builder.Configuration.GetSection("EmailConfig:Smtp"));
+builder.Services.AddHttpClient<EmailProviderResend>();
+builder.Services.AddKeyedScoped<IEmailProvider, EmailProviderResend>("resend");
+builder.Services.AddKeyedScoped<IEmailProvider, EmailProviderSmtp>("smtp");
+builder.Services.AddScoped<IEmailProvider, EmailProviderFallback>();
+builder.Services.AddScoped<IEmailService, WeddingApp_Test.Application.Email.EmailService>();
+
+// Background services
+builder.Services.AddHostedService<DailyAdminReportService>();
+builder.Services.AddHostedService<GuestReminderService>();
 
 
 // AutoMapper

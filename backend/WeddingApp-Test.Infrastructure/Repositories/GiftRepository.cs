@@ -123,6 +123,28 @@ public class GiftRepository(AppDbContext context) : IGiftRepository
             .CountAsync(r => r.GiftId == giftId);
     }
 
+    public async Task<IEnumerable<GiftReservation>> GetReservationsSinceAsync(DateTime since)
+    {
+        return await context.GiftReservations
+            .Include(r => r.ReservedBy)
+            .Include(r => r.Gift)
+            .Where(r => r.ReservedAt >= since)
+            .OrderByDescending(r => r.ReservedAt)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<GiftReservation>> GetPendingGiftRemindersAsync(DateTime asOf)
+    {
+        return await context.GiftReservations
+            .Include(r => r.ReservedBy)
+            .Include(r => r.Gift)
+            .Where(r => r.ReminderRequested
+                        && r.ReminderScheduledFor.HasValue
+                        && r.ReminderScheduledFor.Value.Date <= asOf.Date
+                        && r.ReminderSentAt == null)
+            .ToListAsync();
+    }
+
     public async Task<int> SaveChangesAsync()
     {
         return await context.SaveChangesAsync();

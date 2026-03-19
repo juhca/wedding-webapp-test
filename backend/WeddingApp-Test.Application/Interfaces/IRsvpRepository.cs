@@ -10,6 +10,8 @@ public interface IRsvpRepository
     Task<IEnumerable<Rsvp>> GetAllWithUsersAsync();
     Task<IEnumerable<Rsvp>> GetAttendingAsync();
     Task<IEnumerable<Rsvp>> GetNotAttendingAsync();
+    Task<IEnumerable<Rsvp>> GetRespondedSinceAsync(DateTime since);
+    Task<IEnumerable<Rsvp>> GetPendingWeddingRemindersAsync();
     Task<int> GetTotalGuestCountAsync();
     Task<IEnumerable<Rsvp>> GetWithDietaryRestrictionsAsync();
     Task AddAsync(Rsvp rsvp);

@@ -11,12 +11,14 @@ public class RsvpService : IRsvpService
     private readonly IRsvpRepository _rsvpRepository;
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
+    private readonly IEmailService _emailService;
     
-    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository, IMapper mapper)
+    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository, IMapper mapper, IEmailService emailService)
     {
         _rsvpRepository = rsvpRepository;
         _userRepository = userRepository;
         _mapper = mapper;
+        _emailService = emailService;
     }
     
     public async Task<RsvpDto?> GetUserRsvpAsync(Guid userId)
@@ -99,8 +101,16 @@ public class RsvpService : IRsvpService
             rsvp = existingRsvp;
             _rsvpRepository.Update(rsvp);
         }
-        await _rsvpRepository.SaveChangesAsync(); 
-        
+        await _rsvpRepository.SaveChangesAsync();
+
+        // Ensure User navigation property is loaded for the email templates
+        rsvp.User = user;
+
+        if (existingRsvp is null)
+            _ = _emailService.SendRsvpConfirmationAsync(user, rsvp);
+        else
+            _ = _emailService.SendRsvpUpdatedAsync(user, rsvp);
+
         var result = _mapper.Map<RsvpDto>(rsvp);
         result.MaxCompanionsAllowed = maxCompanions;
         
