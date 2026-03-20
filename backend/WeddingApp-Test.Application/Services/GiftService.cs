@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Http;
 using WeddingApp_Test.Application.DTO.Gift;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
+using WeddingApp_Test.Domain.Enums;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IMapper mapper) : IGiftService
+public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IWeddingInfoRepository weddingInfoRepository, IMapper mapper) : IGiftService
 {
     public async Task<IEnumerable<GiftDto>> GetAllVisibleAsync(Guid? currentUserId = null)
     {
@@ -122,15 +123,41 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
             throw new InvalidOperationException("User not found");
         }
 
+        DateTime? reminderDate = null;
+        if (dto.WantsReminder)
+        {
+            if (dto.ReminderOffsetUnit is null || dto.ReminderOffsetValue is null)
+                throw new InvalidOperationException("ReminderOffsetUnit and ReminderOffsetValue are required when WantsReminder is true.");
+
+            var weddingInfo = await weddingInfoRepository.GetWeddingInfoAsync();
+            if (weddingInfo?.WeddingDate is null)
+                throw new InvalidOperationException("Wedding date is not set. Cannot schedule a reminder.");
+
+            var weddingDate = weddingInfo.WeddingDate.Value.Date;
+            var offset = dto.ReminderOffsetValue.Value;
+
+            reminderDate = dto.ReminderOffsetUnit switch
+            {
+                ReminderOffsetUnit.Days   => weddingDate.AddDays(-offset),
+                ReminderOffsetUnit.Weeks  => weddingDate.AddDays(-offset * 7),
+                ReminderOffsetUnit.Months => weddingDate.AddMonths(-offset),
+                _ => throw new InvalidOperationException("Unknown ReminderOffsetUnit.")
+            };
+
+            var tomorrow = DateTime.UtcNow.Date.AddDays(1);
+            if (reminderDate < tomorrow)
+                throw new InvalidOperationException("The calculated reminder date must be at least tomorrow.");
+        }
+
         var reservation = new GiftReservation
         {
             Id = Guid.NewGuid(),
-            GiftId = giftId,   
+            GiftId = giftId,
             ReservedByUserId = userId,
             ReservedAt = DateTime.UtcNow,
             Notes = dto.Notes,
             ReminderRequested = dto.WantsReminder,
-            ReminderScheduledFor = dto.ReminderDate,
+            ReminderScheduledFor = reminderDate,
         };
         
         await giftRepository.AddReservationAsync(reservation);
@@ -152,7 +179,7 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
             PurchaseLink = gift.PurchaseLink,
             Message = "Gift reserved successfully! Check your email for details.",
             ReminderScheduled = dto.WantsReminder,
-            ReminderDate = dto.ReminderDate,
+            ReminderDate = reminderDate,
             RemainingReservations = gift.RemainingReservations ?? 0,
             GiftFullyReserved = gift.IsFullyReserved
         };
