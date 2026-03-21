@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Infrastructure.Persistence;
 
 namespace WeddingApp_Test.API.Tests.Fixtures;
@@ -52,6 +53,23 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
 
             // Ensure the database is created
             db.Database.EnsureCreated();
+
+            // Seed WeddingInfo — required for WeddingInfoController tests.
+            // DataSeeder is skipped in Testing env, so we seed it here.
+            db.WeddingInfo.Add(new WeddingInfo
+            {
+                Id = Guid.NewGuid(),
+                BrideName = "Jane", BrideSurname = "Doe",
+                GroomName = "John", GroomSurname = "Toe",
+                ApproximateDate = "Summer 2027",
+                WeddingName = "Test Wedding",
+                WeddingDescription = "Test wedding description",
+                WeddingDate = new DateTime(2027, 6, 19),
+                PartyLocationName = "Test Party Venue",
+                HouseLocationName = "Test House",
+                CreatedAt = DateTime.UtcNow
+            });
+            db.SaveChanges();
         });
         
         builder.ConfigureAppConfiguration((_, config) =>
