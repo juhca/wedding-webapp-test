@@ -1,12 +1,15 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WeddingApp_Test.API.Attributes;
+using WeddingApp_Test.Application.Configuration;
 using WeddingApp_Test.Application.DTO.Gift;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Enums;
 
 namespace WeddingApp_Test.API.Controllers;
 
+[RequiresModule(ModuleNames.Gifts)]
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]

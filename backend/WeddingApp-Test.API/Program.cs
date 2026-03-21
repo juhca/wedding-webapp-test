@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using WeddingApp_Test.API.Filters;
+using WeddingApp_Test.Application.Configuration;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Application.Mappings;
 using WeddingApp_Test.Application.Services;
@@ -14,7 +16,26 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+// Module licensing — registers the filter that enforces [RequiresModule] on controllers.
+builder.Services.AddScoped<ModuleEnforcementFilter>();
+builder.Services.AddControllers(options =>
+{
+    // Register as a global filter so it runs on every controller action automatically.
+    options.Filters.AddService<ModuleEnforcementFilter>();
+});
+
+// Bind the "Modules" section from appsettings.json to ModulesOptions.
+// IOptions<ModulesOptions> is then available for injection (e.g. in ModuleEnforcementFilter and FeaturesController).
+builder.Services.Configure<ModulesOptions>(
+    builder.Configuration.GetSection(ModulesOptions.SectionName));
+
+// CORS — allows the Angular dev server (port 4200) to call the backend.
+// Without this, the browser blocks the cross-origin request and the app fails to start.
+builder.Services.AddCors(options =>
+    options.AddDefaultPolicy(policy =>
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()));
 
 // Choose DB provider
 var useInMemory = builder.Configuration.GetValue<bool>("UseInMemoryDatabase");
@@ -137,6 +158,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();

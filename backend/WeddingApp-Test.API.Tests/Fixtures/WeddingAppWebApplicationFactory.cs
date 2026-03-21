@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WeddingApp_Test.Infrastructure.Persistence;
 
@@ -52,8 +53,29 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
             // Ensure the database is created
             db.Database.EnsureCreated();
         });
+        
+        builder.ConfigureAppConfiguration((_, config) =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Modules:Gifts"] = "true",
+                ["Modules:Rsvp"] = "true",
+                ["Modules:Reminders"] = "true"
+            });
+        });
     }
     
+    public WebApplicationFactory<Program> WithModules(Dictionary<string, string?> overrides)
+    {
+        return WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, config) =>
+            {
+                config.AddInMemoryCollection(overrides);
+            });
+        });
+    }
+
     public async Task ResetDatabaseAsync()
     {
         using var scope = Services.CreateScope();

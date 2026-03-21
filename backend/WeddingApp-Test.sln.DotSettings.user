@@ -9,30 +9,10 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AServiceProvider_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003FAppData_003FRoaming_003FJetBrains_003FRider2025_002E2_003Fresharper_002Dhost_003FSourcesCache_003Fce37be1a06b16c6faa02038d2cc477dd3bca5b217ceeb41c5f2ad45c1bf9_003FServiceProvider_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AValueTask_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003FAppData_003FRoaming_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003F1bbf1a30d4ced2216e71269a345f51394b03ebc2bc041a5f5077e87cb649b6_003FValueTask_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AWebApplicationFactory_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003FAppData_003FRoaming_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003F255f916e5a2d424ef01b291afc761e049b367614440bf4b216824ec479064b_003FWebApplicationFactory_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d0e28255_002Dad6c_002D43c3_002Dbe19_002D7275d33a3d7a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="AdminLogin_WithValidCredentials_ReturnsOkWithTokens" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.AuthControllerTests.AdminLogin_WithValidCredentials_ReturnsOkWithTokens&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.WeddingInfoControllerTests.WeddingInfo_ReturnBasicWeddingInfo&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.WeddingInfoControllerTests.WeddingInfo_ReturnFullExperienceWeddingInfo&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.WeddingInfoControllerTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.RsvpControllerTests.GetMyRsvp_WhenNotAuthenticated_ReturnsUnauthorized&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.RsvpControllerTests.CreateRsvp_WithValidData_ReturnsOk&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.RsvpControllerTests.CreateRsvp_ExceedingMaxCompanions_ReturnsBadRequest&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.RsvpControllerTests.GetSummary_AsAdmin_ReturnsStatistics&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.RsvpControllerTests.ExportCatering_AsAdmin_ReturnsCsvFile&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.RsvpControllerTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.GetAllGifts_WhenNotAuthenticated_ReturnsUnauthorized&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.GetAllGifts_AsAuthenticatedUser_ReturnsVisibleGifts&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.GetGiftById_ExistingGift_ReturnsGift&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.GetGiftById_NonExistentGift_ReturnsNotFound&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.GetMyReservations_ReturnsOnlyMyReservedGifts&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.ReserveGift_SingleUse_Success&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.ReserveGift_MultiUse_Success&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.ReserveGift_AlreadyFullyReserved_ReturnsBadRequest&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.ReserveGift_UserAlreadyReserved_ReturnsBadRequest&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.ReserveGift_NonExistentGift_ReturnsNotFound&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.UnreserveGift_Success&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests.UnreserveGift_NotReservedByUser_ReturnsNotFound&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::E4BDD18B-9460-4BB9-9E3C-2EFFCE24FC65::net9.0::WeddingApp_Test.API.Tests.Controllers.GiftsControllerTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=62a130c2_002Dc8fb_002D4bbd_002D907e_002D0cdfda7e8159/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;And&gt;&#xD;
+    &lt;Namespace&gt;WeddingApp_Test.API.Tests.Controllers&lt;/Namespace&gt;&#xD;
+    &lt;Project Location="C:\Users\tomas\RiderProjects\wedding-webapp-test\backend\WeddingApp-Test.API.Tests" Presentation="&amp;lt;WeddingApp-Test.API.Tests&amp;gt;" /&gt;&#xD;
+  &lt;/And&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	</wpf:ResourceDictionary>
