@@ -4,5 +4,5 @@ namespace WeddingApp_Test.Application.Interfaces;
 
 public interface IEmailService
 {
-    Task SendReminderEmailAsync(Reminder reminder);
+    Task SendReminderEmailAsync(string recipientEmail, Reminder reminder);
 }

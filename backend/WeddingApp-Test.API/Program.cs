@@ -68,7 +68,14 @@ builder.Services.AddScoped<IWeddingInfoService, WeddingInfoService>();
 builder.Services.AddScoped<IRsvpService, RsvpService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
-builder.Services.AddScoped<IEmailService, TodoEmailService>();
+// Email — bind provider options
+builder.Services.Configure<ResendOptions>(builder.Configuration.GetSection(ResendOptions.SectionName));
+builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
+// Register providers as IEmailProvider (order = priority: first = primary)
+builder.Services.AddHttpClient<ResendEmailProvider>();
+builder.Services.AddTransient<IEmailProvider, ResendEmailProvider>();
+builder.Services.AddTransient<IEmailProvider, SmtpEmailProvider>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IReminderProcessor, ReminderProcessor>();
 
 // Background Services

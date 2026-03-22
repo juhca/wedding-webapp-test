@@ -5,6 +5,9 @@ namespace WeddingApp_Test.Application.Services;
 
 public class ReminderProcessor(IReminderRepository reminderRepository, IEmailService emailService, ILogger<ReminderProcessor> logger) : IReminderProcessor
 {
+    // TODO: replace with real recipient email resolved from the reminder's target (User)
+    private const string TestRecipientEmail = "test@example.com";
+
     public async Task ProcessAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
@@ -27,7 +30,7 @@ public class ReminderProcessor(IReminderRepository reminderRepository, IEmailSer
         // --- Normal reminders (today or yesterday) ---
         foreach (var reminder in normal)
         {
-            await emailService.SendReminderEmailAsync(reminder);
+            await emailService.SendReminderEmailAsync(TestRecipientEmail, reminder);
             reminder.SentAt = now;
         }
 
