@@ -28,10 +28,6 @@ public class Rsvp
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     
-    // Reminder settings
-    public bool WantsReminder { get; set; }
-    public DateTime? ReminderSentAt { get; set; }
-    
     /// <summary>
     /// Total number of people (self + companions)
     /// </summary>

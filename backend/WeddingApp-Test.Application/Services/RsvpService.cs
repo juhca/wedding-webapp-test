@@ -56,7 +56,6 @@ public class RsvpService : IRsvpService
                 IsAttending = dto.IsAttending,
                 DietaryRestrictions = dto.DietaryRestrictions,
                 Notes = dto.Notes,
-                WantsReminder = dto.WantsReminder,
                 RespondedAt = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,
                 Companions = dto.Companions.Select(c => new GuestCompanion
@@ -78,7 +77,6 @@ public class RsvpService : IRsvpService
             // Update existing RSVP
             existingRsvp.IsAttending = dto.IsAttending;
             existingRsvp.Notes = dto.Notes;
-            existingRsvp.WantsReminder = dto.WantsReminder;
             existingRsvp.RespondedAt = DateTime.UtcNow;
             existingRsvp.UpdatedAt = DateTime.UtcNow;
             existingRsvp.DietaryRestrictions = dto.DietaryRestrictions;

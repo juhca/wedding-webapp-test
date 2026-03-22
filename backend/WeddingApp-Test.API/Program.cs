@@ -54,6 +54,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IWeddingInfoRepository, WeddingInfoRepository>();
 builder.Services.AddScoped<IRsvpRepository, RsvpRepository>();
 builder.Services.AddScoped<IGiftRepository, GiftRepository>();
+builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
 
 
 // Services
@@ -64,6 +65,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IWeddingInfoService, WeddingInfoService>();
 builder.Services.AddScoped<IRsvpService, RsvpService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
+builder.Services.AddScoped<IReminderService, ReminderService>();
 
 
 // AutoMapper

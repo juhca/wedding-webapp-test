@@ -23,8 +23,4 @@ public class GiftReservation
     [MaxLength(500)]
     public string? Notes { get; set; }
     
-    // Reminder system
-    public bool ReminderRequested { get; set; }
-    public DateTime? ReminderScheduledFor { get; set; }
-    public DateTime? ReminderSentAt { get; set; }
 }
