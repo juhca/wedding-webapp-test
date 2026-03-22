@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using WeddingApp_Test.API.BackgroundServices;
 using WeddingApp_Test.API.Filters;
 using WeddingApp_Test.Application.Configuration;
 using WeddingApp_Test.Application.Interfaces;
@@ -11,6 +12,7 @@ using WeddingApp_Test.Application.Services;
 using WeddingApp_Test.Infrastructure.Data;
 using WeddingApp_Test.Infrastructure.Persistence;
 using WeddingApp_Test.Infrastructure.Repositories;
+using WeddingApp_Test.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,7 +68,11 @@ builder.Services.AddScoped<IWeddingInfoService, WeddingInfoService>();
 builder.Services.AddScoped<IRsvpService, RsvpService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
+builder.Services.AddScoped<IEmailService, TodoEmailService>();
+builder.Services.AddScoped<IReminderProcessor, ReminderProcessor>();
 
+// Background Services
+builder.Services.AddHostedService<ReminderBackgroundService>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(

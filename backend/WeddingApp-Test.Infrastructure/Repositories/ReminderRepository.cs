@@ -27,6 +27,13 @@ public class ReminderRepository(AppDbContext context) : IReminderRepository
         return await context.Reminders.FindAsync(id);
     }
 
+    public async Task<IEnumerable<Reminder>> GetPendingRemindersAsync(DateTime upToDateUtc)
+    {
+        return await context.Reminders
+            .Where(r => r.SentAt == null && r.ScheduledFor.Date <= upToDateUtc.Date)
+            .ToListAsync();
+    }
+
     public async Task AddAsync(Reminder reminder)
     {
         await context.Reminders.AddAsync(reminder);
