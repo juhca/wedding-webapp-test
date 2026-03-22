@@ -125,12 +125,10 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
         var reservation = new GiftReservation
         {
             Id = Guid.NewGuid(),
-            GiftId = giftId,   
+            GiftId = giftId,
             ReservedByUserId = userId,
             ReservedAt = DateTime.UtcNow,
             Notes = dto.Notes,
-            ReminderRequested = dto.WantsReminder,
-            ReminderScheduledFor = dto.ReminderDate,
         };
         
         await giftRepository.AddReservationAsync(reservation);
@@ -151,8 +149,6 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
             GiftName = gift.Name,
             PurchaseLink = gift.PurchaseLink,
             Message = "Gift reserved successfully! Check your email for details.",
-            ReminderScheduled = dto.WantsReminder,
-            ReminderDate = dto.ReminderDate,
             RemainingReservations = gift.RemainingReservations ?? 0,
             GiftFullyReserved = gift.IsFullyReserved
         };

@@ -288,8 +288,6 @@ public class GiftsControllerTests(WeddingAppWebApplicationFactory factory)
 
         var reserveDto = new ReserveGiftDto
         {
-            WantsReminder = true,
-            ReminderDate = DateTime.UtcNow.AddDays(30),
             Notes = "Can't wait to use it!"
         };
 
@@ -306,7 +304,6 @@ public class GiftsControllerTests(WeddingAppWebApplicationFactory factory)
         Assert.Equal("Cutlery Set", result.GiftName);
         Assert.Equal(0, result.RemainingReservations);
         Assert.True(result.GiftFullyReserved);
-        Assert.True(result.ReminderScheduled);
         Assert.Contains("reserved successfully", result.Message);
     }
     

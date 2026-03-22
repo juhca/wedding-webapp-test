@@ -12,8 +12,7 @@ public class RsvpDto
     // Main guest's dietary restrictions
     public string? DietaryRestrictions { get; set; }
     public string? Notes { get; set; }
-    public bool WantsReminder { get; set; }
-    
+
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     

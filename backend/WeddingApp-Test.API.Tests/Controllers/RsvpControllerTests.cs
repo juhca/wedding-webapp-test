@@ -56,7 +56,6 @@ public class RsvpControllerTests(WeddingAppWebApplicationFactory factory) : ICla
             IsAttending = true,
             DietaryRestrictions = "Vegetarian",
             Notes = "Excited!",
-            WantsReminder = true,
             Companions =
             [
                 new CreateGuestCompanionDto
@@ -68,19 +67,18 @@ public class RsvpControllerTests(WeddingAppWebApplicationFactory factory) : ICla
                 }
             ]
         };
-        
+
         // Act
         // Add the token to the Authorization header
-        _client.DefaultRequestHeaders.Authorization = 
+        _client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult.Token);
         var response = await _client.PostAsJsonAsync("/api/rsvp", createDto);
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var rsvpResponse = await response.Content.ReadFromJsonAsync<RsvpDto>();
-        
+
         Assert.NotNull(rsvpResponse);
-        Assert.Equal(createDto.WantsReminder, rsvpResponse.WantsReminder);
         Assert.Equal(createDto.IsAttending, rsvpResponse.IsAttending);
         Assert.Equal(createDto.DietaryRestrictions, rsvpResponse.DietaryRestrictions);
         Assert.Equal(createDto.Notes, rsvpResponse.Notes);
@@ -114,7 +112,6 @@ public class RsvpControllerTests(WeddingAppWebApplicationFactory factory) : ICla
             IsAttending = true,
             DietaryRestrictions = "Vegetarian",
             Notes = "Excited!",
-            WantsReminder = true,
             Companions =
             [
                 new CreateGuestCompanionDto

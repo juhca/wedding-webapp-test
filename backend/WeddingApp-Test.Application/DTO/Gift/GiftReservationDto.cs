@@ -8,6 +8,4 @@ public class GiftReservationDto
     public string ReservedByName { get; set; } = string.Empty;
     public DateTime ReservedAt { get; set; }
     public string? Notes { get; set; }
-    public bool ReminderRequested { get; set; }
-    public DateTime? ReminderScheduledFor { get; set; }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using WeddingApp_Test.Application.DTO.Gift;
+using WeddingApp_Test.Application.DTO.Reminder;
 using WeddingApp_Test.Application.DTO.Rsvp;
 using WeddingApp_Test.Application.DTO.WeddingInfo;
 using WeddingApp_Test.Domain.Entities;
@@ -25,6 +26,10 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.UpdatedByUserId, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore());
         
+        // Reminder Mappings
+        CreateMap<Reminder, ReminderDto>()
+            .ForMember(dest => dest.IsSent, opt => opt.MapFrom(src => src.SentAt.HasValue));
+
         // Rsvp Mappings
         CreateMap<Rsvp, RsvpDto>()
             .ForMember(dest => dest.MaxCompanionsAllowed, opt => opt.Ignore())
@@ -45,7 +50,6 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.RespondedAt, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.ReminderSentAt, opt => opt.Ignore())
             .ForMember(dest => dest.TotalGuests, opt => opt.Ignore());
         
         // GuestCompanion Mappings
