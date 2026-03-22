@@ -3,10 +3,7 @@ using WeddingApp_Test.Application.Interfaces;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class ReminderProcessor(
-    IReminderRepository reminderRepository,
-    IEmailService emailService,
-    ILogger<ReminderProcessor> logger) : IReminderProcessor
+public class ReminderProcessor(IReminderRepository reminderRepository, IEmailService emailService, ILogger<ReminderProcessor> logger) : IReminderProcessor
 {
     public async Task ProcessAsync(CancellationToken cancellationToken = default)
     {
@@ -35,7 +32,9 @@ public class ReminderProcessor(
         }
 
         if (normal.Count > 0)
+        {
             logger.LogInformation("Sent {Count} reminder(s).", normal.Count);
+        }
 
         // --- Missed reminders (older than yesterday) ---
         foreach (var reminder in missed)
@@ -47,7 +46,9 @@ public class ReminderProcessor(
         }
 
         if (missed.Count > 0)
+        {
             logger.LogWarning("{Count} missed reminder(s) require special handling.", missed.Count);
+        }
 
         await reminderRepository.SaveChangesAsync();
     }

@@ -2,11 +2,6 @@ using WeddingApp_Test.Application.Interfaces;
 
 namespace WeddingApp_Test.API.BackgroundServices;
 
-// BackgroundService is an abstract class from ASP.NET Core that implements IHostedService.
-// IHostedService is the raw interface (StartAsync + StopAsync), but implementing it directly
-// means you have to manage the run loop and cancellation yourself. BackgroundService does that
-// boilerplate for you — you just override ExecuteAsync and write your logic there.
-// The host calls StartAsync on app startup, which kicks off ExecuteAsync in the background.
 // When the app shuts down, the CancellationToken (stoppingToken) is cancelled, which causes
 // WaitForNextTickAsync to return false and the loop to exit cleanly.
 public class ReminderBackgroundService(
