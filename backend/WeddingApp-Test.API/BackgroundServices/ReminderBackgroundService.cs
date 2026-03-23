@@ -4,9 +4,7 @@ namespace WeddingApp_Test.API.BackgroundServices;
 
 // When the app shuts down, the CancellationToken (stoppingToken) is cancelled, which causes
 // WaitForNextTickAsync to return false and the loop to exit cleanly.
-public class ReminderBackgroundService(
-    IServiceScopeFactory scopeFactory,
-    ILogger<ReminderBackgroundService> logger) : BackgroundService
+public class ReminderBackgroundService(IServiceScopeFactory scopeFactory, ILogger<ReminderBackgroundService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

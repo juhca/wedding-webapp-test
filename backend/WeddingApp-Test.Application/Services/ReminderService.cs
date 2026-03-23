@@ -6,12 +6,7 @@ using WeddingApp_Test.Domain.Enums;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class ReminderService(
-    IReminderRepository reminderRepository,
-    IGiftRepository giftRepository,
-    IRsvpRepository rsvpRepository,
-    IWeddingInfoRepository weddingInfoRepository,
-    IMapper mapper) : IReminderService
+public class ReminderService(IReminderRepository reminderRepository, IGiftRepository giftRepository, IRsvpRepository rsvpRepository, IWeddingInfoRepository weddingInfoRepository, IMapper mapper) : IReminderService
 {
     private const int MaxRemindersPerTarget = 10;
 

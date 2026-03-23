@@ -5,9 +5,7 @@ using WeddingApp_Test.Domain.Entities;
 
 namespace WeddingApp_Test.Infrastructure.Services;
 
-public class EmailService(
-    IEnumerable<IEmailProvider> providers,
-    ILogger<EmailService> logger) : IEmailService
+public class EmailService(IEnumerable<IEmailProvider> providers, ILogger<EmailService> logger) : IEmailService
 {
     public async Task SendReminderEmailAsync(string recipientEmail, Reminder reminder)
     {

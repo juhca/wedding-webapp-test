@@ -7,10 +7,7 @@ using WeddingApp_Test.Application.Interfaces;
 
 namespace WeddingApp_Test.Infrastructure.Services;
 
-public class ResendEmailProvider(
-    HttpClient httpClient,
-    IOptions<ResendOptions> options,
-    ILogger<ResendEmailProvider> logger) : IEmailProvider
+public class ResendEmailProvider(HttpClient httpClient, IOptions<ResendOptions> options, ILogger<ResendEmailProvider> logger) : IEmailProvider
 {
     private const string ResendApiUrl = "https://api.resend.com/emails";
     private readonly ResendOptions _options = options.Value;
