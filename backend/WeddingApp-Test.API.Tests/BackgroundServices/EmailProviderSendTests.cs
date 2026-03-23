@@ -56,8 +56,7 @@ public class EmailProviderSendTests(WeddingAppWebApplicationFactory factory) : I
 
         if (enabled && string.IsNullOrWhiteSpace(recipientEmail))
         {
-            throw new InvalidOperationException(
-                "Set EmailProviderTests:RecipientEmail in configuration when EmailProviderTests:Enabled is true.");
+            throw new InvalidOperationException("Set EmailProviderTests:RecipientEmail in configuration when EmailProviderTests:Enabled is true.");
         }
 
         return (enabled, recipientEmail ?? string.Empty);

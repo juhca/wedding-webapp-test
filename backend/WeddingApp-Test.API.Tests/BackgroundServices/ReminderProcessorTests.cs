@@ -11,12 +11,12 @@ namespace WeddingApp_Test.API.Tests.BackgroundServices;
 [Collection("Sequential")]
 public class ReminderProcessorTests(WeddingAppWebApplicationFactory factory) : IClassFixture<WeddingAppWebApplicationFactory>
 {
-
     [Fact]
     public async Task ProcessAsync_TodayReminder_SetsSentAt()
     {
         await factory.ResetDatabaseAsync();
-        var reminder = MakeReminder(scheduledFor: DateTime.UtcNow.Date);
+        var rsvp = await SeedUserWithRsvpAsync();
+        var reminder = MakeReminder(scheduledFor: DateTime.UtcNow.Date, targetId: rsvp.Id);
         await SeedReminder(reminder);
 
         await RunProcessor();
@@ -29,7 +29,8 @@ public class ReminderProcessorTests(WeddingAppWebApplicationFactory factory) : I
     public async Task ProcessAsync_YesterdayReminder_SetsSentAt()
     {
         await factory.ResetDatabaseAsync();
-        var reminder = MakeReminder(scheduledFor: DateTime.UtcNow.Date.AddDays(-1));
+        var rsvp = await SeedUserWithRsvpAsync();
+        var reminder = MakeReminder(scheduledFor: DateTime.UtcNow.Date.AddDays(-1), targetId: rsvp.Id);
         await SeedReminder(reminder);
 
         await RunProcessor();
@@ -42,7 +43,6 @@ public class ReminderProcessorTests(WeddingAppWebApplicationFactory factory) : I
     public async Task ProcessAsync_MissedReminder_DoesNotSetSentAt()
     {
         await factory.ResetDatabaseAsync();
-        // Older than yesterday → missed, should not be marked as sent
         var reminder = MakeReminder(scheduledFor: DateTime.UtcNow.Date.AddDays(-5));
         await SeedReminder(reminder);
 
@@ -76,7 +76,6 @@ public class ReminderProcessorTests(WeddingAppWebApplicationFactory factory) : I
         await RunProcessor();
 
         var result = await GetReminder(reminder.Id);
-        // SentAt should still be the original value, not updated
         Assert.Equal(alreadySentAt, result!.SentAt);
     }
 
@@ -94,11 +93,12 @@ public class ReminderProcessorTests(WeddingAppWebApplicationFactory factory) : I
     public async Task ProcessAsync_MixedReminders_OnlySendsNormalOnes()
     {
         await factory.ResetDatabaseAsync();
+        var rsvp = await SeedUserWithRsvpAsync();
 
-        var today = MakeReminder(scheduledFor: DateTime.UtcNow.Date);
-        var yesterday = MakeReminder(scheduledFor: DateTime.UtcNow.Date.AddDays(-1));
-        var missed = MakeReminder(scheduledFor: DateTime.UtcNow.Date.AddDays(-5));
-        var future = MakeReminder(scheduledFor: DateTime.UtcNow.Date.AddDays(3));
+        var today     = MakeReminder(scheduledFor: DateTime.UtcNow.Date,              targetId: rsvp.Id);
+        var yesterday = MakeReminder(scheduledFor: DateTime.UtcNow.Date.AddDays(-1),  targetId: rsvp.Id);
+        var missed    = MakeReminder(scheduledFor: DateTime.UtcNow.Date.AddDays(-5));
+        var future    = MakeReminder(scheduledFor: DateTime.UtcNow.Date.AddDays(3));
 
         await SeedReminder(today);
         await SeedReminder(yesterday);
@@ -112,8 +112,37 @@ public class ReminderProcessorTests(WeddingAppWebApplicationFactory factory) : I
         Assert.Null((await GetReminder(missed.Id))!.SentAt);
         Assert.Null((await GetReminder(future.Id))!.SentAt);
     }
-    
+
     #region Helpers
+
+    private async Task<Rsvp> SeedUserWithRsvpAsync()
+    {
+        using var scope = factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            FirstName = "Test",
+            LastName = "User",
+            Email = $"test-{Guid.NewGuid()}@example.com",
+            Role = UserRole.LimitedExperience
+        };
+
+        var rsvp = new Rsvp
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            IsAttending = true
+        };
+
+        db.Users.Add(user);
+        db.Rsvps.Add(rsvp);
+        await db.SaveChangesAsync();
+
+        return rsvp;
+    }
+
     private async Task SeedReminder(Reminder reminder)
     {
         using var scope = factory.Services.CreateScope();
@@ -136,16 +165,17 @@ public class ReminderProcessorTests(WeddingAppWebApplicationFactory factory) : I
         await processor.ProcessAsync();
     }
 
-    private static Reminder MakeReminder(DateTime scheduledFor, DateTime? sentAt = null) => new()
+    private static Reminder MakeReminder(DateTime scheduledFor, Guid? targetId = null, DateTime? sentAt = null) => new()
     {
         Id = Guid.NewGuid(),
         Type = ReminderType.Rsvp,
-        TargetId = Guid.NewGuid(),
+        TargetId = targetId ?? Guid.NewGuid(),
         Value = 1,
         Unit = ReminderUnit.Weeks,
         ScheduledFor = scheduledFor,
         SentAt = sentAt,
         CreatedAt = DateTime.UtcNow
     };
+
     #endregion
 }
