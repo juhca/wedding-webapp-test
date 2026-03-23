@@ -7,28 +7,60 @@ namespace WeddingApp_Test.Infrastructure.Services;
 
 public class EmailService(IEnumerable<IEmailProvider> providers, ILogger<EmailService> logger) : IEmailService
 {
-    public async Task SendReminderEmailAsync(string recipientEmail, Reminder reminder)
+    private const int MaxRetriesPerProvider = 3;
+
+    public async Task SendReminderEmailAsync(string recipientEmail, Reminder reminder, CancellationToken ct = default)
     {
         var message = new ReminderEmailMessage(reminder);
         var providerList = providers.ToList();
 
         foreach (var provider in providerList)
         {
-            try
+            var shouldSwitchProvider = false;
+
+            for (int attempt = 1; attempt <= MaxRetriesPerProvider; attempt++)
             {
-                await provider.SendAsync(recipientEmail, message);
-                return;
+                try
+                {
+                    await provider.SendAsync(recipientEmail, message, ct);
+
+                    logger.LogInformation("Reminder {ReminderId} sent to {Recipient} via {Provider} on attempt {Attempt}.", reminder.Id, recipientEmail, provider.Name, attempt);
+
+                    return;
+                }
+                catch (EmailProviderException ex) when (ex.IsPermanent)
+                {
+                    logger.LogError(ex, "{Provider} reported a permanent failure for reminder {ReminderId} — skipping provider.", provider.Name, reminder.Id);
+
+                    shouldSwitchProvider = true;
+                    break;
+                }
+                catch (EmailProviderException ex)
+                {
+                    logger.LogWarning(ex, "{Provider} transient failure for reminder {ReminderId} (attempt {Attempt}/{Max}).", provider.Name, reminder.Id, attempt, MaxRetriesPerProvider);
+
+                    if (attempt < MaxRetriesPerProvider)
+                    {
+						await Task.Delay(TimeSpan.FromSeconds(attempt * 2), ct); // 2s then 4s
+					}
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    logger.LogWarning(ex, "{Provider} unexpected failure for reminder {ReminderId} (attempt {Attempt}/{Max}).", provider.Name, reminder.Id, attempt, MaxRetriesPerProvider);
+
+                    if (attempt < MaxRetriesPerProvider)
+                    {
+						await Task.Delay(TimeSpan.FromSeconds(attempt * 2), ct);
+					}
+                }
             }
-            catch (Exception ex)
+
+            if (!shouldSwitchProvider)
             {
-                logger.LogWarning(ex,
-                    "Email provider '{Provider}' failed for reminder {ReminderId}. Trying next.",
-                    provider.Name, reminder.Id);
+                logger.LogError("All {Max} retries exhausted for {Provider} on reminder {ReminderId} — switching to next provider.", MaxRetriesPerProvider, provider.Name, reminder.Id);
             }
         }
 
-        logger.LogCritical(
-            "All {Count} email provider(s) failed for reminder {ReminderId}. Check your email configuration.",
-            providerList.Count, reminder.Id);
+        logger.LogCritical("All {Count} email provider(s) failed for reminder {ReminderId}. Email was not delivered.", providerList.Count, reminder.Id);
     }
 }

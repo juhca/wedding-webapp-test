@@ -17,7 +17,7 @@ public class SmtpEmailProvider(
 
     public string Name => "SMTP";
 
-    public async Task SendAsync(string recipientEmail, EmailMessage message)
+    public async Task SendAsync(string recipientEmail, EmailMessage message, CancellationToken ct = default)
     {
         var mail = new MimeMessage();
         mail.From.Add(new MailboxAddress(_options.FromDisplayName, _options.FromAddress));
@@ -25,11 +25,18 @@ public class SmtpEmailProvider(
         mail.Subject = message.Subject;
         mail.Body = new TextPart("plain") { Text = message.Body };
 
-        using var client = new SmtpClient();
-        await client.ConnectAsync(_options.Host, _options.Port, SecureSocketOptions.StartTls);
-        await client.AuthenticateAsync(_options.Username, _options.Password);
-        await client.SendAsync(mail);
-        await client.DisconnectAsync(true);
+        try
+        {
+            using var client = new SmtpClient();
+            await client.ConnectAsync(_options.Host, _options.Port, SecureSocketOptions.StartTls, ct);
+            await client.AuthenticateAsync(_options.Username, _options.Password, ct);
+            await client.SendAsync(mail, ct);
+            await client.DisconnectAsync(true, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            throw new EmailProviderException($"SMTP failed: {ex.Message}", isPermanent: false, inner: ex);
+        }
 
         logger.LogInformation("{Provider}: email sent to {Recipient}.", Name, recipientEmail);
     }

@@ -14,7 +14,7 @@ public class ResendEmailProvider(HttpClient httpClient, IOptions<ResendOptions> 
 
     public string Name => "Resend";
 
-    public async Task SendAsync(string recipientEmail, EmailMessage message)
+    public async Task SendAsync(string recipientEmail, EmailMessage message, CancellationToken ct = default)
     {
         httpClient.DefaultRequestHeaders.Clear();
         httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_options.ApiKey}");
@@ -27,12 +27,14 @@ public class ResendEmailProvider(HttpClient httpClient, IOptions<ResendOptions> 
             text = message.Body
         };
 
-        var response = await httpClient.PostAsJsonAsync(ResendApiUrl, payload);
+        var response = await httpClient.PostAsJsonAsync(ResendApiUrl, payload, ct);
 
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync();
-            throw new InvalidOperationException($"Resend API returned {(int)response.StatusCode}: {error}");
+            var error = await response.Content.ReadAsStringAsync(ct);
+            var isPermanent = (int)response.StatusCode is >= 400 and < 500;
+
+            throw new EmailProviderException($"Resend API returned {(int)response.StatusCode}: {error}", isPermanent);
         }
 
         logger.LogInformation("{Provider}: email sent to {Recipient}.", Name, recipientEmail);

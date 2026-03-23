@@ -30,7 +30,7 @@ public class ReminderProcessor(IReminderRepository reminderRepository, IEmailSer
         // --- Normal reminders (today or yesterday) ---
         foreach (var reminder in normal)
         {
-            await emailService.SendReminderEmailAsync(TestRecipientEmail, reminder);
+            await emailService.SendReminderEmailAsync(TestRecipientEmail, reminder, cancellationToken);
             reminder.SentAt = now;
         }
 
