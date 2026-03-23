@@ -13,8 +13,7 @@ using WeddingApp_Test.Infrastructure.Persistence;
 namespace WeddingApp_Test.API.Tests.Controllers;
 
 [Trait("Category", "GiftsController Integration Tests")]
-public class GiftsControllerTests(WeddingAppWebApplicationFactory factory)
-    : IClassFixture<WeddingAppWebApplicationFactory>
+public class GiftsControllerTests(WeddingAppWebApplicationFactory factory) : IClassFixture<WeddingAppWebApplicationFactory>
 {
     private readonly HttpClient _client =  factory.CreateClient();
     

@@ -1,9 +1,12 @@
 using Microsoft.Extensions.Logging;
+using WeddingApp_Test.Application.Email;
 using WeddingApp_Test.Application.Interfaces;
+using WeddingApp_Test.Domain.Entities;
+using WeddingApp_Test.Domain.Enums;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class ReminderProcessor(IReminderRepository reminderRepository, IEmailService emailService, ILogger<ReminderProcessor> logger) : IReminderProcessor
+public class ReminderProcessor(IReminderRepository reminderRepository, IRsvpRepository rsvpRepository, IGiftRepository giftRepository, IEmailService emailService, ILogger<ReminderProcessor> logger) : IReminderProcessor
 {
     public async Task ProcessAsync(CancellationToken cancellationToken = default)
     {
@@ -27,8 +30,29 @@ public class ReminderProcessor(IReminderRepository reminderRepository, IEmailSer
         // --- Normal reminders (today or yesterday) ---
         foreach (var reminder in normal)
         {
-            await emailService.SendReminderEmailAsync(reminder);
-            reminder.SentAt = now;
+            var recipientEmail = await ResolveRecipientEmailAsync(reminder, cancellationToken);
+            if (recipientEmail is null)
+            {
+                logger.LogWarning(
+                    "Could not resolve recipient for reminder {ReminderId} (Type={Type}, TargetId={TargetId}) — skipping.",
+                    reminder.Id, reminder.Type, reminder.TargetId);
+                continue;
+            }
+
+            try
+            {
+                await emailService.SendReminderEmailAsync(recipientEmail, reminder, cancellationToken);
+                reminder.SentAt = now;
+            }
+            catch (EmailDeliveryException ex) when (ex.IsTransient)
+            {
+                logger.LogError(ex, "All email providers are down — aborting batch. Pending reminders will retry on the next run.");
+                break;
+            }
+            catch (EmailDeliveryException ex)
+            {
+                logger.LogError(ex, "Permanent delivery failure for reminder {ReminderId} — skipping.", reminder.Id);
+            }
         }
 
         if (normal.Count > 0)
@@ -51,5 +75,19 @@ public class ReminderProcessor(IReminderRepository reminderRepository, IEmailSer
         }
 
         await reminderRepository.SaveChangesAsync();
+    }
+
+    private async Task<string?> ResolveRecipientEmailAsync(Reminder reminder, CancellationToken ct)
+    {
+        return reminder.Type switch
+        {
+            ReminderType.Rsvp =>
+                (await rsvpRepository.GetByIdAsync(reminder.TargetId))?.User.Email,
+
+            ReminderType.Gift =>
+                (await giftRepository.GetReservationAsync(reminder.TargetId))?.ReservedBy.Email,
+
+            _ => null
+        };
     }
 }

@@ -4,9 +4,7 @@ namespace WeddingApp_Test.API.BackgroundServices;
 
 // When the app shuts down, the CancellationToken (stoppingToken) is cancelled, which causes
 // WaitForNextTickAsync to return false and the loop to exit cleanly.
-public class ReminderBackgroundService(
-    IServiceScopeFactory scopeFactory,
-    ILogger<ReminderBackgroundService> logger) : BackgroundService
+public class ReminderBackgroundService(IServiceScopeFactory scopeFactory, ILogger<ReminderBackgroundService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -16,23 +14,35 @@ public class ReminderBackgroundService(
         // so reminders are processed once on startup and then every 24 hours after that.
         using var timer = new PeriodicTimer(TimeSpan.FromHours(24));
 
-        do
+        try
         {
-            try
+            await ProcessTickAsync(stoppingToken);
+
+            while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                // BackgroundService is a singleton, but IReminderProcessor depends on scoped services
-                // (repositories, DbContext). We create a fresh scope per tick so they are properly
-                // instantiated and disposed after each run.
-                await using var scope = scopeFactory.CreateAsyncScope();
-                // extracted processing from ReminderBackgroundService, so it can be tested
-                var processor = scope.ServiceProvider.GetRequiredService<IReminderProcessor>();
-                await processor.ProcessAsync(stoppingToken);
+                await ProcessTickAsync(stoppingToken);
             }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Unhandled error while processing reminders.");
-            }
+
+            logger.LogInformation("ReminderBackgroundService stopped.");
         }
-        while (await timer.WaitForNextTickAsync(stoppingToken));
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            logger.LogInformation("ReminderBackgroundService stopped.");
+		}
+		catch (Exception ex)
+        {
+            logger.LogError(ex, "Unhandled error in ReminderBackgroundService.");
+        }
+    }
+
+    private async Task ProcessTickAsync(CancellationToken stoppingToken)
+    {
+        // BackgroundService is a singleton, but IReminderProcessor depends on scoped services
+        // (repositories, DbContext). We create a fresh scope per tick so they are properly
+        // instantiated and disposed after each run.
+        await using var scope = scopeFactory.CreateAsyncScope();
+        // extracted processing from ReminderBackgroundService, so it can be tested
+        var processor = scope.ServiceProvider.GetRequiredService<IReminderProcessor>();
+        await processor.ProcessAsync(stoppingToken);
     }
 }
