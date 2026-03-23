@@ -9,9 +9,7 @@ using WeddingApp_Test.Application.Interfaces;
 
 namespace WeddingApp_Test.Infrastructure.Services;
 
-public class SmtpEmailProvider(
-    IOptions<SmtpOptions> options,
-    ILogger<SmtpEmailProvider> logger) : IEmailProvider
+public class SmtpEmailProvider(IOptions<SmtpOptions> options, ILogger<SmtpEmailProvider> logger) : IEmailProvider
 {
     private readonly SmtpOptions _options = options.Value;
 

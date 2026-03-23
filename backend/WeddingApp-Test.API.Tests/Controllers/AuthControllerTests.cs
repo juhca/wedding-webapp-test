@@ -17,8 +17,7 @@ namespace WeddingApp_Test.API.Tests.Controllers;
 /// These tests verify the entire authentication flow from HTTP request to database.
 /// </summary>
 [Trait("Category", "AuthController Integration Tests")]
-public class AuthControllerTests(WeddingAppWebApplicationFactory factory)
-	: IClassFixture<WeddingAppWebApplicationFactory>
+public class AuthControllerTests(WeddingAppWebApplicationFactory factory) : IClassFixture<WeddingAppWebApplicationFactory>
 {
 	private readonly HttpClient _client = factory.CreateClient();
 
