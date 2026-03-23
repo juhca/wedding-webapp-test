@@ -34,8 +34,10 @@ public class ReminderProcessor(IReminderRepository reminderRepository, IRsvpRepo
             if (recipientEmail is null)
             {
                 logger.LogWarning(
-                    "Could not resolve recipient for reminder {ReminderId} (Type={Type}, TargetId={TargetId}) — skipping.",
+                    "Could not resolve recipient for reminder {ReminderId} (Type={Type}, TargetId={TargetId}) — marking as handled to avoid endless retries.",
                     reminder.Id, reminder.Type, reminder.TargetId);
+
+                reminder.SentAt = now;
                 continue;
             }
 

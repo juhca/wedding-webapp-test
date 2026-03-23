@@ -20,11 +20,15 @@ public class TokenService : ITokenService
     
     public string CreateJwtToken(User user)
     {
+        var now = DateTime.UtcNow;
+
         var claims = new List<Claim>()
         {
             new (ClaimTypes.Email, user.Email),
             new (ClaimTypes.Role, user.Role.ToString()),
-            new (ClaimTypes.NameIdentifier, user.Id.ToString())
+            new (ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new (JwtRegisteredClaimNames.Iat, new DateTimeOffset(now).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };
         
         var key = new SymmetricSecurityKey(
@@ -37,7 +41,7 @@ public class TokenService : ITokenService
             issuer: _configuration.GetSection("TokenConfig:Issuer").Value,
             audience: _configuration.GetSection("TokenConfig:Audience").Value,
             claims: claims,
-            expires: DateTime.UtcNow.AddDays(1),
+            expires: now.AddDays(1),
             signingCredentials: creds
         );
         
