@@ -13,6 +13,7 @@ public class EmailService(IEnumerable<IEmailProvider> providers, ILogger<EmailSe
     {
         var message = new ReminderEmailMessage(reminder);
         var providerList = providers.ToList();
+        var hadTransientFailure = false;
 
         foreach (var provider in providerList)
         {
@@ -41,8 +42,8 @@ public class EmailService(IEnumerable<IEmailProvider> providers, ILogger<EmailSe
 
                     if (attempt < MaxRetriesPerProvider)
                     {
-						await Task.Delay(TimeSpan.FromSeconds(attempt * 2), ct); // 2s then 4s
-					}
+                        await Task.Delay(TimeSpan.FromSeconds(attempt * 2), ct); // 2s then 4s
+                    }
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
@@ -50,17 +51,20 @@ public class EmailService(IEnumerable<IEmailProvider> providers, ILogger<EmailSe
 
                     if (attempt < MaxRetriesPerProvider)
                     {
-						await Task.Delay(TimeSpan.FromSeconds(attempt * 2), ct);
-					}
+                        await Task.Delay(TimeSpan.FromSeconds(attempt * 2), ct);
+                    }
                 }
             }
 
             if (!shouldSwitchProvider)
             {
+                // retries exhausted transiently — not a permanent/recipient-specific issue
+                hadTransientFailure = true;
                 logger.LogError("All {Max} retries exhausted for {Provider} on reminder {ReminderId} — switching to next provider.", MaxRetriesPerProvider, provider.Name, reminder.Id);
             }
         }
 
         logger.LogCritical("All {Count} email provider(s) failed for reminder {ReminderId}. Email was not delivered.", providerList.Count, reminder.Id);
+        throw new EmailDeliveryException(reminder.Id, isTransient: hadTransientFailure);
     }
 }

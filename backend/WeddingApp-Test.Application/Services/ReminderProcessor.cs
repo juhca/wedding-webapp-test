@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using WeddingApp_Test.Application.Email;
 using WeddingApp_Test.Application.Interfaces;
 
 namespace WeddingApp_Test.Application.Services;
@@ -30,8 +31,20 @@ public class ReminderProcessor(IReminderRepository reminderRepository, IEmailSer
         // --- Normal reminders (today or yesterday) ---
         foreach (var reminder in normal)
         {
-            await emailService.SendReminderEmailAsync(TestRecipientEmail, reminder, cancellationToken);
-            reminder.SentAt = now;
+            try
+            {
+                await emailService.SendReminderEmailAsync(TestRecipientEmail, reminder, cancellationToken);
+                reminder.SentAt = now;
+            }
+            catch (EmailDeliveryException ex) when (ex.IsTransient)
+            {
+                logger.LogError(ex, "All email providers are down — aborting batch. Pending reminders will retry on the next run.");
+                break;
+            }
+            catch (EmailDeliveryException ex)
+            {
+                logger.LogError(ex, "Permanent delivery failure for reminder {ReminderId} — skipping.", reminder.Id);
+            }
         }
 
         if (normal.Count > 0)
