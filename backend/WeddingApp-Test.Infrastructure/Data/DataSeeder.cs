@@ -2,6 +2,7 @@
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Domain.Enums;
 using WeddingApp_Test.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace WeddingApp_Test.Infrastructure.Data;
 
@@ -26,6 +27,9 @@ public static class DataSeeder
         
         // Seed Sample Guests
         SeedSampleGuests(context);
+
+        // Seed default email templates
+        SeedEmailTemplates(context);
     }
     
     /// <summary>
@@ -206,6 +210,83 @@ public static class DataSeeder
         foreach (var guest in sampleGuests)
         {
             Console.WriteLine($"   {guest.FirstName} {guest.LastName} ({guest.Role}) - Code: {guest.AccessCode}");
+        }
+    }
+
+    /// <summary>
+    /// Seed default event-driven email templates.
+    /// Templates use Liquid syntax; property names are PascalCase (e.g. {{ user.FirstName }}).
+    /// </summary>
+    private static void SeedEmailTemplates(AppDbContext context)
+    {
+        var defaults = new[]
+        {
+            new EmailTemplate
+            {
+                Id = Guid.NewGuid(),
+                Name = "RSVP Confirmation",
+                TriggerName = "rsvp.submitted",
+                Subject = "Thanks for your RSVP, {{ user.FirstName }}!",
+                Body = """
+                    Hi {{ user.FirstName }},
+
+                    We've received your RSVP. {% if rsvp.IsAttending %}We're thrilled that you'll be joining us!{% else %}We're sorry you won't be able to make it.{% endif %}
+
+                    See you soon!
+                    """,
+                IsActive = true,
+                MaxSendsPerUser = 1,
+                CreatedAt = DateTime.UtcNow
+            },
+            new EmailTemplate
+            {
+                Id = Guid.NewGuid(),
+                Name = "Gift Reservation Confirmation",
+                TriggerName = "gift.reserved",
+                Subject = "Gift reserved: {{ gift.Name }}",
+                Body = """
+                    Hi {{ user.FirstName }},
+
+                    You've reserved "{{ gift.Name }}" from the wedding gift list. Thank you so much!
+
+                    {% if gift.PurchaseLink %}You can purchase it here: {{ gift.PurchaseLink }}{% endif %}
+                    """,
+                IsActive = true,
+                MaxSendsPerUser = null,
+                CreatedAt = DateTime.UtcNow
+            },
+            new EmailTemplate
+            {
+                Id = Guid.NewGuid(),
+                Name = "Gift Reservation Cancelled",
+                TriggerName = "gift.unreserved",
+                Subject = "Reservation cancelled: {{ gift.Name }}",
+                Body = """
+                    Hi {{ user.FirstName }},
+
+                    Your reservation for "{{ gift.Name }}" has been cancelled.
+                    """,
+                IsActive = true,
+                MaxSendsPerUser = null,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        var existingTriggers = context.EmailTemplates
+            .Select(t => t.TriggerName)
+            .ToHashSet();
+
+        var toSeed = defaults.Where(t => !existingTriggers.Contains(t.TriggerName)).ToList();
+
+        if (toSeed.Count > 0)
+        {
+            context.EmailTemplates.AddRange(toSeed);
+            context.SaveChanges();
+            Console.WriteLine($"  Email templates seeded: {string.Join(", ", toSeed.Select(t => t.TriggerName))}");
+        }
+        else
+        {
+            Console.WriteLine("  Email templates already exist");
         }
     }
 }

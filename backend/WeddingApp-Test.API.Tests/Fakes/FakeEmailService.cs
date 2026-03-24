@@ -10,4 +10,7 @@ public class FakeEmailService : IEmailService
 {
     public Task SendReminderEmailAsync(string recipientEmail, Reminder reminder, CancellationToken ct = default)
         => Task.CompletedTask;
+
+    public Task SendAsync(string recipientEmail, string subject, string body, CancellationToken ct = default)
+        => Task.CompletedTask;
 }

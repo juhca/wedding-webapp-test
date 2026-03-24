@@ -11,12 +11,15 @@ public class RsvpService : IRsvpService
     private readonly IRsvpRepository _rsvpRepository;
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
-    
-    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository, IMapper mapper)
+    private readonly IEmailDispatchService _emailDispatch;
+
+    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository, IMapper mapper,
+        IEmailDispatchService emailDispatch)
     {
         _rsvpRepository = rsvpRepository;
         _userRepository = userRepository;
         _mapper = mapper;
+        _emailDispatch = emailDispatch;
     }
     
     public async Task<RsvpDto?> GetUserRsvpAsync(Guid userId)
@@ -97,11 +100,14 @@ public class RsvpService : IRsvpService
             rsvp = existingRsvp;
             _rsvpRepository.Update(rsvp);
         }
-        await _rsvpRepository.SaveChangesAsync(); 
-        
+        await _rsvpRepository.SaveChangesAsync();
+
+        await _emailDispatch.DispatchEventAsync("rsvp.submitted", user,
+            new Dictionary<string, object?> { ["rsvp"] = rsvp });
+
         var result = _mapper.Map<RsvpDto>(rsvp);
         result.MaxCompanionsAllowed = maxCompanions;
-        
+
         return result;
     }
 

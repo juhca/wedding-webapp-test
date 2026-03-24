@@ -45,13 +45,20 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
                 options.UseInMemoryDatabase(_dbName);
             });
 
-            // Replace real email service with no-op fake — prevents real emails during tests
+            // Replace real email service with no-op fakes — prevents real emails during tests
             var emailDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IEmailService));
             if (emailDescriptor != null)
             {
-				services.Remove(emailDescriptor);
-			}
+                services.Remove(emailDescriptor);
+            }
             services.AddScoped<IEmailService, FakeEmailService>();
+
+            var dispatchDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IEmailDispatchService));
+            if (dispatchDescriptor != null)
+            {
+                services.Remove(dispatchDescriptor);
+            }
+            services.AddScoped<IEmailDispatchService, FakeEmailDispatchService>();
 
             // Build the service provider
             var serviceProvider = services.BuildServiceProvider();

@@ -7,7 +7,8 @@ using WeddingApp_Test.Domain.Entities;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IMapper mapper) : IGiftService
+public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IMapper mapper,
+    IEmailDispatchService emailDispatch) : IGiftService
 {
     public async Task<IEnumerable<GiftDto>> GetAllVisibleAsync(Guid? currentUserId = null)
     {
@@ -139,8 +140,8 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
         // Reload to get updated counts
         gift = await giftRepository.GetByIdWithReservationsAsync(giftId);
         
-        // TODO(TOMAS): send confirmation email
-        // ex.: await _emailService.SendGiftReservationConfirmationAsync(...)
+        await emailDispatch.DispatchEventAsync("gift.reserved", user,
+            new Dictionary<string, object?> { ["gift"] = gift, ["reservation"] = reservation });
 
         return new GiftReservationConfirmationDto
         {
@@ -171,6 +172,13 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
         }
         
         await giftRepository.SaveChangesAsync();
+
+        var user = await userRepository.GetByIdAsync(userId);
+        if (user is not null && gift is not null)
+        {
+            await emailDispatch.DispatchEventAsync("gift.unreserved", user, 
+                new Dictionary<string, object?> { ["gift"] = gift });
+        }
     }
 
     public async Task<IEnumerable<GiftDto>> GetMyReservedGiftsAsync(Guid userId)

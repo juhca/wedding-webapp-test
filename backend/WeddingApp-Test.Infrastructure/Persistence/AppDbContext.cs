@@ -13,6 +13,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 	public DbSet<Gift> Gifts => Set<Gift>();
 	public DbSet<GiftReservation> GiftReservations => Set<GiftReservation>();
 	public DbSet<Reminder> Reminders => Set<Reminder>();
+	public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
+	public DbSet<EmailSendLog> EmailSendLogs => Set<EmailSendLog>();
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -147,25 +149,47 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 		modelBuilder.Entity<GiftReservation>(entity =>
 		{
 			entity.HasKey(e => e.Id);
-            
+
 			// Many reservations belong to one gift
 			entity.HasOne(gr => gr.Gift)
 				.WithMany(g => g.Reservations)
 				.HasForeignKey(gr => gr.GiftId)
 				.OnDelete(DeleteBehavior.Cascade); // Delete reservations when gift is deleted
-            
+
 			// Many reservations belong to one user
 			entity.HasOne(gr => gr.ReservedBy)
 				.WithMany()
 				.HasForeignKey(gr => gr.ReservedByUserId)
 				.OnDelete(DeleteBehavior.Cascade); // Don't delete reservations when user is deleted
-            
+
 			entity.HasIndex(gr => gr.GiftId);
 			entity.HasIndex(gr => gr.ReservedByUserId);
 			entity.HasIndex(gr => gr.ReservedAt);
-            
+
 			// UNIQUE CONSTRAINT - user can reserve same gift only once
 			entity.HasIndex(gr => new { gr.GiftId, gr.ReservedByUserId }).IsUnique();
+		});
+
+		// EMAIL TEMPLATE CONFIGURATION
+		modelBuilder.Entity<EmailTemplate>(entity =>
+		{
+			entity.HasKey(t => t.Id);
+			entity.HasIndex(t => t.TriggerName);
+			entity.HasIndex(t => t.IsActive);
+		});
+
+		// EMAIL SEND LOG CONFIGURATION
+		modelBuilder.Entity<EmailSendLog>(entity =>
+		{
+			entity.HasKey(l => l.Id);
+
+			entity.HasOne(l => l.Template)
+				.WithMany(t => t.SendLogs)
+				.HasForeignKey(l => l.TemplateId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasIndex(l => new { l.TemplateId, l.UserId });
+			entity.HasIndex(l => l.SentAt);
 		});
 	}
 }

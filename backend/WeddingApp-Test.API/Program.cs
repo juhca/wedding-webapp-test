@@ -12,6 +12,7 @@ using WeddingApp_Test.Application.Services;
 using WeddingApp_Test.Infrastructure.Data;
 using WeddingApp_Test.Infrastructure.Persistence;
 using WeddingApp_Test.Infrastructure.Repositories;
+using WeddingApp_Test.Infrastructure.Email;
 using WeddingApp_Test.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -76,6 +77,8 @@ builder.Services.AddHttpClient<ResendEmailProvider>();
 builder.Services.AddTransient<IEmailProvider, ResendEmailProvider>();
 builder.Services.AddTransient<IEmailProvider, SmtpEmailProvider>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailDispatchService, EmailDispatchService>();
+builder.Services.AddSingleton<ILiquidRenderer, LiquidRenderer>();
 builder.Services.AddScoped<IReminderProcessor, ReminderProcessor>();
 
 // Background Services
