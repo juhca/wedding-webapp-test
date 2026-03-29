@@ -15,4 +15,6 @@ public interface IUserRepository
 	Task<RefreshToken?> GetRefreshTokenAsync(string token);
 	Task RevokeRefreshTokenAsync(RefreshToken token, string? replacedByToken = null);
 	Task RevokeAllUserTokensAsync(Guid userId);
+	void Update(User user);
+	Task SaveChangesAsync();
 }

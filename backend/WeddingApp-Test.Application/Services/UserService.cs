@@ -83,6 +83,27 @@ public class UserService : IUserService
         return new UserDto(user.FirstName, user.LastName, user.Email, user.PasswordHash, user.AccessCode, user.Role, user.MaxCompanions);
     }
 
+    public async Task<UserDto?> UpdateEmailAsync(Guid userId, UpdateUserEmailRequest request)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user is null)
+        {
+            return null;
+        }
+
+        var existing = await _userRepository.GetByEmailAsync(request.Email);
+        if (existing is not null && existing.Id != userId)
+        {
+            throw new InvalidOperationException($"Email '{request.Email}' is already in use.");
+        }
+
+        user.Email = request.Email;
+        _userRepository.Update(user);
+        await _userRepository.SaveChangesAsync();
+
+        return new UserDto(user.FirstName, user.LastName, user.Email, user.PasswordHash, user.AccessCode, user.Role, user.MaxCompanions);
+    }
+
     private async Task<string> GenerateAccessCode(int length = 6)
     { 
         var chars =

@@ -15,4 +15,7 @@ public class CreateRsvpDto
     
     [MaxLength(1000)]
     public string? Notes { get; set; }
+
+    [EmailAddress, MaxLength(255)]
+    public string? RecipientEmail { get; set; }
 }

@@ -7,8 +7,7 @@ using WeddingApp_Test.Domain.Entities;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IMapper mapper,
-    IEmailDispatchService emailDispatch) : IGiftService
+public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IMapper mapper, IEmailDispatchService emailDispatch) : IGiftService
 {
     public async Task<IEnumerable<GiftDto>> GetAllVisibleAsync(Guid? currentUserId = null)
     {
@@ -140,9 +139,24 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
         // Reload to get updated counts
         gift = await giftRepository.GetByIdWithReservationsAsync(giftId);
         
-        await emailDispatch.DispatchEventAsync("gift.reserved", user,
-            new Dictionary<string, object?> { ["gift"] = gift, ["reservation"] = reservation });
+        // Send confirmation email only if I have the user email
+        var email = dto.Email ?? user.Email;
+        if (!string.IsNullOrEmpty(email))
+        {
+            if (string.IsNullOrEmpty(user.Email))
+            {
+                user.Email = email;
+                userRepository.Update(user);
+                await userRepository.SaveChangesAsync();
+            }
 
+            // TODO(TOMAS): user can add a new email, not his own
+            // TODO(TOMAS): email address must be confirmed by clicking the link on the email?
+            await emailDispatch.DispatchEventAsync("gift.reserved", user,
+                new Dictionary<string, object?> { ["gift"] = gift, ["reservation"] = reservation });
+        }
+        
+        
         return new GiftReservationConfirmationDto
         {
             ReservationId = reservation.Id,
@@ -174,7 +188,8 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
         await giftRepository.SaveChangesAsync();
 
         var user = await userRepository.GetByIdAsync(userId);
-        if (user is not null && gift is not null)
+        // TODO(TOMAS): dispatch event async must be done with an email not user? or at least specific emails must be send differently
+        if (user is not null && gift is not null && !string.IsNullOrEmpty(user.Email))
         {
             await emailDispatch.DispatchEventAsync("gift.unreserved", user, 
                 new Dictionary<string, object?> { ["gift"] = gift });

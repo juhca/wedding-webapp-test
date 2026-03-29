@@ -13,8 +13,7 @@ public class RsvpService : IRsvpService
     private readonly IMapper _mapper;
     private readonly IEmailDispatchService _emailDispatch;
 
-    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository, IMapper mapper,
-        IEmailDispatchService emailDispatch)
+    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository, IMapper mapper, IEmailDispatchService emailDispatch)
     {
         _rsvpRepository = rsvpRepository;
         _userRepository = userRepository;
@@ -48,7 +47,6 @@ public class RsvpService : IRsvpService
         var existingRsvp = await _rsvpRepository.GetByUserIdAsync(userId);
         
         Rsvp rsvp;
-
         if (existingRsvp is null)
         {
             // Create new RSVP
@@ -100,10 +98,25 @@ public class RsvpService : IRsvpService
             rsvp = existingRsvp;
             _rsvpRepository.Update(rsvp);
         }
-        await _rsvpRepository.SaveChangesAsync();
 
-        await _emailDispatch.DispatchEventAsync("rsvp.submitted", user,
-            new Dictionary<string, object?> { ["rsvp"] = rsvp });
+        // Send confirmation email only if i have the user email
+        var email = dto.RecipientEmail ?? user.Email;
+        if (!string.IsNullOrEmpty(email))
+        {
+            if (string.IsNullOrEmpty(user.Email))
+            {
+                user.Email = email;
+                _userRepository.Update(user);
+                await _userRepository.SaveChangesAsync();
+            }
+            
+            // TODO(TOMAS): user can add a new email, not his own
+            // TODO(TOMAS): email address must be confirmed by clicking the link on the email?
+            await _emailDispatch.DispatchEventAsync("rsvp.submitted", user,
+                new Dictionary<string, object?> { ["rsvp"] = rsvp });
+        }
+        
+        await _rsvpRepository.SaveChangesAsync();
 
         var result = _mapper.Map<RsvpDto>(rsvp);
         result.MaxCompanionsAllowed = maxCompanions;

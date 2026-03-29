@@ -48,7 +48,17 @@ public class UserRepository(AppDbContext context) : IUserRepository
 	{
 		return await context.Users.FindAsync(id);
 	}
-	
+
+	public void Update(User user)
+	{
+		context.Update(user);
+	}
+
+	public async Task SaveChangesAsync()
+	{
+		await context.SaveChangesAsync();
+	}
+
 	public async Task AddRefreshTokenAsync(User user, RefreshToken refreshToken)
 	{
 		refreshToken.UserId =  user.Id;

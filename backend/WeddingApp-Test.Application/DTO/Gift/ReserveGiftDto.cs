@@ -6,4 +6,7 @@ public class ReserveGiftDto
 {
     [MaxLength(500)]
     public string? Notes { get; set; }
+    
+    [EmailAddress, MaxLength(255)] 
+    public string? Email { get; set; } = string.Empty;
 }
