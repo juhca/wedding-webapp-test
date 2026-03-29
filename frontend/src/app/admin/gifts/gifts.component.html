@@ -1,0 +1,123 @@
+<div class="page-header">
+  <div class="header-row">
+    <div>
+      <h1>Gifts</h1>
+      <p class="subtitle">Manage the gift registry</p>
+    </div>
+    <div class="actions">
+      <button mat-stroked-button (click)="csvInput.click()">
+        <mat-icon>upload_file</mat-icon>
+        Import CSV
+      </button>
+      <input #csvInput type="file" accept=".csv" hidden (change)="importCsv($event)" />
+      <button mat-flat-button color="primary" (click)="openCreate()">
+        <mat-icon>add</mat-icon>
+        Add Gift
+      </button>
+    </div>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="spinner-center"><mat-spinner></mat-spinner></div>
+} @else {
+  <mat-card>
+    <mat-card-content>
+      @if (gifts().length === 0) {
+        <div class="empty-state">
+          <mat-icon>card_giftcard</mat-icon>
+          <p>No gifts yet. Add one or import a CSV.</p>
+        </div>
+      } @else {
+        <table mat-table [dataSource]="gifts()" class="full-width-table" multiTemplateDataRows>
+          <ng-container matColumnDef="expand">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let g" class="expand-cell">
+              @if (g.reservations?.length) {
+                <button mat-icon-button (click)="toggleGift(g); $event.stopPropagation()">
+                  <mat-icon>{{ isExpanded(g) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="displayOrder">
+            <th mat-header-cell *matHeaderCellDef>#</th>
+            <td mat-cell *matCellDef="let g">{{ g.displayOrder }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Gift</th>
+            <td mat-cell *matCellDef="let g">
+              <strong>{{ g.name }}</strong>
+              @if (g.description) {
+                <br /><small class="desc">{{ g.description | slice:0:60 }}{{ g.description.length > 60 ? '…' : '' }}</small>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef>Price</th>
+            <td mat-cell *matCellDef="let g">{{ g.price != null ? ('€' + g.price) : '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="reservations">
+            <th mat-header-cell *matHeaderCellDef>Reservations</th>
+            <td mat-cell *matCellDef="let g">
+              <mat-chip [class.full]="g.isFullyReserved">
+                {{ g.reservationStatus }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="isVisible">
+            <th mat-header-cell *matHeaderCellDef>Visible</th>
+            <td mat-cell *matCellDef="let g">
+              <mat-icon [class.visible]="g.isVisible" [class.hidden]="!g.isVisible">
+                {{ g.isVisible ? 'visibility' : 'visibility_off' }}
+              </mat-icon>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let g">
+              <button mat-icon-button matTooltip="Edit" (click)="openEdit(g)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Delete" color="warn" (click)="delete(g)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <!-- Expanded reservers detail -->
+          <ng-container matColumnDef="expandedDetail">
+            <td mat-cell *matCellDef="let g" [attr.colspan]="displayedColumns.length" class="detail-cell">
+              <div class="reservers-detail" [@detailExpand]="isExpanded(g) ? 'expanded' : 'collapsed'">
+                <div class="reservers-inner">
+                  <span class="reservers-title">Reserved by ({{ g.reservations.length }})</span>
+                  <table class="reservers-table">
+                    <thead><tr><th>Guest</th><th>Reserved At</th></tr></thead>
+                    <tbody>
+                      @for (r of g.reservations; track r.id) {
+                        <tr>
+                          <td>{{ r.reservedByName }}</td>
+                          <td>{{ r.reservedAt | date:'short' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="gift-row" [class.has-reservations]="row.reservations?.length" (click)="row.reservations?.length && toggleGift(row)"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+        </table>
+      }
+    </mat-card-content>
+  </mat-card>
+}

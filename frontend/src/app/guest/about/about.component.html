@@ -1,0 +1,167 @@
+<div class="about-page">
+
+  <!-- ── Hero ── -->
+  <section class="about-hero">
+    <div class="gold-rule"></div>
+    <p class="about-label">{{ 'ABOUT.SUBTITLE' | translate }}</p>
+    @if (info()) {
+      <h1 class="couple-names">
+        {{ info()!.brideName }}
+        <span class="amp">&amp;</span>
+        {{ info()!.groomName }}
+      </h1>
+    }
+    <p class="about-desc">{{ 'ABOUT.INTRO' | translate }}</p>
+  </section>
+
+  <!-- ── Meet the Couple ── -->
+  <section class="about-section">
+    <h2 class="section-title">
+      <mat-icon>people</mat-icon>
+      {{ 'ABOUT.MEET_TITLE' | translate }}
+    </h2>
+
+    <div class="profiles-row">
+
+      <!-- Bride -->
+      <div class="profile-card" [class.expanded]="brideExpanded()">
+        <div class="profile-photo-wrap">
+          <img src="https://picsum.photos/seed/bride-about/480/480"
+               [alt]="info()?.brideName || ''"
+               loading="lazy" />
+          <div class="profile-photo-ring"></div>
+        </div>
+        <div class="profile-body">
+          <div class="profile-name">
+            {{ info()?.brideName }} {{ info()?.brideSurname }}
+          </div>
+          <div class="profile-tagline">{{ 'ABOUT.BRIDE_TAGLINE' | translate }}</div>
+          <p class="profile-bio">{{ 'ABOUT.BRIDE_BIO' | translate }}</p>
+
+          @if (brideExpanded()) {
+            <div class="profile-extra">
+              <ul class="profile-facts">
+                <li><mat-icon>star</mat-icon>{{ 'ABOUT.BRIDE_FACT_1' | translate }}</li>
+                <li><mat-icon>star</mat-icon>{{ 'ABOUT.BRIDE_FACT_2' | translate }}</li>
+                <li><mat-icon>star</mat-icon>{{ 'ABOUT.BRIDE_FACT_3' | translate }}</li>
+              </ul>
+              <blockquote class="profile-quote">{{ 'ABOUT.BRIDE_QUOTE' | translate }}</blockquote>
+            </div>
+          }
+
+          <button mat-stroked-button class="profile-more-btn"
+                  (click)="brideExpanded.update(v => !v)">
+            <mat-icon>{{ brideExpanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+            {{ (brideExpanded() ? 'ABOUT.SHOW_LESS' : 'ABOUT.BRIDE_MORE') | translate }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Groom -->
+      <div class="profile-card" [class.expanded]="groomExpanded()">
+        <div class="profile-photo-wrap">
+          <img src="https://picsum.photos/seed/groom-about/480/480"
+               [alt]="info()?.groomName || ''"
+               loading="lazy" />
+          <div class="profile-photo-ring"></div>
+        </div>
+        <div class="profile-body">
+          <div class="profile-name">
+            {{ info()?.groomName }} {{ info()?.groomSurname }}
+          </div>
+          <div class="profile-tagline">{{ 'ABOUT.GROOM_TAGLINE' | translate }}</div>
+          <p class="profile-bio">{{ 'ABOUT.GROOM_BIO' | translate }}</p>
+
+          @if (groomExpanded()) {
+            <div class="profile-extra">
+              <ul class="profile-facts">
+                <li><mat-icon>star</mat-icon>{{ 'ABOUT.GROOM_FACT_1' | translate }}</li>
+                <li><mat-icon>star</mat-icon>{{ 'ABOUT.GROOM_FACT_2' | translate }}</li>
+                <li><mat-icon>star</mat-icon>{{ 'ABOUT.GROOM_FACT_3' | translate }}</li>
+              </ul>
+              <blockquote class="profile-quote">{{ 'ABOUT.GROOM_QUOTE' | translate }}</blockquote>
+            </div>
+          }
+
+          <button mat-stroked-button class="profile-more-btn"
+                  (click)="groomExpanded.update(v => !v)">
+            <mat-icon>{{ groomExpanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+            {{ (groomExpanded() ? 'ABOUT.SHOW_LESS' : 'ABOUT.GROOM_MORE') | translate }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Timeline ── -->
+  <section class="about-section">
+    <h2 class="section-title">
+      <mat-icon>favorite</mat-icon>
+      {{ 'ABOUT.TIMELINE_TITLE' | translate }}
+    </h2>
+
+    <div class="timeline">
+      @for (item of timeline; track item.key; let i = $index) {
+        <div class="tl-item" [class.flip]="i % 2 !== 0">
+
+          <div class="tl-side tl-text-side">
+            <div class="tl-year">{{ 'ABOUT.TL_' + item.key + '_YEAR' | translate }}</div>
+            <h3>{{ 'ABOUT.TL_' + item.key + '_TITLE' | translate }}</h3>
+            <p>{{ 'ABOUT.TL_' + item.key + '_TEXT' | translate }}</p>
+          </div>
+
+          <div class="tl-center">
+            <div class="tl-dot"></div>
+          </div>
+
+          <div class="tl-side tl-img-side">
+            <img [src]="item.image"
+                 [alt]="'ABOUT.TL_' + item.key + '_TITLE' | translate"
+                 loading="lazy" />
+          </div>
+
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ── Gallery Carousel ── -->
+  <section class="about-section">
+    <h2 class="section-title">
+      <mat-icon>photo_library</mat-icon>
+      {{ 'ABOUT.GALLERY_TITLE' | translate }}
+    </h2>
+    <p class="section-sub">{{ 'ABOUT.GALLERY_SUBTITLE' | translate }}</p>
+
+    <div class="carousel-wrap">
+      <div class="carousel-track"
+           [style.transform]="'translateX(-' + currentSlide() * 100 + '%)'">
+        @for (slide of slides; track $index) {
+          <div class="carousel-slide">
+            <img [src]="slide.image" [alt]="slide.captionKey | translate" loading="lazy" />
+            <div class="slide-caption">{{ slide.captionKey | translate }}</div>
+          </div>
+        }
+      </div>
+
+      <button class="car-btn car-prev" (click)="prev()" [attr.aria-label]="'ABOUT.PREV' | translate">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button class="car-btn car-next" (click)="next()" [attr.aria-label]="'ABOUT.NEXT' | translate">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+
+      <div class="car-dots">
+        @for (slide of slides; track $index; let i = $index) {
+          <button class="car-dot"
+                  [class.active]="i === currentSlide()"
+                  (click)="goTo(i)"
+                  [attr.aria-label]="'Slide ' + (i + 1)">
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+
+</div>

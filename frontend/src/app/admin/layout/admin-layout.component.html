@@ -1,0 +1,81 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav
+    [opened]="sidenavOpened()"
+    [mode]="isMobile() ? 'over' : 'side'"
+    class="sidenav"
+  >
+    <div class="sidenav-header">
+      <div class="brand-mark">
+        <mat-icon class="brand-icon">diamond</mat-icon>
+      </div>
+      <div class="brand-text">
+        <span class="app-title">Event Admin</span>
+        <span class="app-sub">Wedding Management</span>
+      </div>
+    </div>
+
+    <mat-nav-list class="nav-section">
+      @for (item of navItems; track item.route) {
+        <a
+          mat-list-item
+          class="nav-item"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          (click)="isMobile() && toggleSidenav()"
+        >
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+          <span class="nav-active-bar"></span>
+        </a>
+      }
+    </mat-nav-list>
+
+    <div class="sidenav-footer">
+      @if (currentUser()) {
+        <div class="user-badge">
+          <div class="user-avatar">{{ (currentUser()?.email || 'A')[0].toUpperCase() }}</div>
+          <div class="user-meta">
+            <span class="user-name">Administrator</span>
+            <span class="user-email">{{ currentUser()?.email }}</span>
+          </div>
+        </div>
+      }
+      <div class="footer-actions">
+        <button mat-stroked-button class="view-site-btn" (click)="viewSite()">
+          <mat-icon>open_in_new</mat-icon>
+          View Site
+        </button>
+        <button mat-stroked-button class="logout-btn" (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="sidenav-content">
+    <mat-toolbar class="admin-header">
+      <button mat-icon-button class="menu-btn" (click)="toggleSidenav()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <div class="header-brand">
+        <mat-icon>diamond</mat-icon>
+        <span>Event Admin</span>
+      </div>
+      <span class="header-spacer"></span>
+      <a mat-icon-button class="view-site-icon" (click)="viewSite()" matTooltip="View public site">
+        <mat-icon>open_in_new</mat-icon>
+      </a>
+      @if (currentUser()) {
+        <div class="header-user">
+          <div class="header-avatar">{{ (currentUser()?.email || 'A')[0].toUpperCase() }}</div>
+        </div>
+      }
+    </mat-toolbar>
+
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

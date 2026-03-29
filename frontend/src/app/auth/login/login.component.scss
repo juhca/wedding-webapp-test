@@ -1,0 +1,235 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: linear-gradient(160deg, #0d1b2a 0%, #1b3a5c 60%, #0d2137 100%);
+  position: relative;
+}
+
+// ── Language switcher (top-right corner) ─────────────────────────────────────
+.login-lang-switcher {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+
+  .lang-trigger {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 20px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    transition: background 0.15s, border-color 0.15s;
+
+    &:hover { background: rgba(201,168,76,0.15); border-color: #c9a84c; }
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+
+  .lang-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: white;
+    border: 1px solid #ede9e3;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    overflow: hidden;
+    z-index: 300;
+    min-width: 90px;
+
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #444;
+      transition: background 0.12s;
+
+      &:hover { background: #faf6ee; }
+      &.active { background: rgba(201,168,76,0.1); color: #8a6a1e; font-weight: 700; }
+    }
+  }
+}
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 40px;
+  color: white;
+
+  .brand-gem {
+    font-size: 3rem;
+    height: 3rem;
+    width: 3rem;
+    color: #c9a84c;
+    display: block;
+    margin: 0 auto 12px;
+  }
+
+  .brand-title {
+    margin: 0 0 8px;
+    font-size: 2rem;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .brand-sub {
+    margin: 0;
+    color: rgba(255,255,255,0.55);
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+  }
+}
+
+.login-panels {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  max-width: 780px;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+.panel {
+  flex: 1;
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+
+  &.panel-guest {
+    background: #fffdf8;
+    border-top: 4px solid #c9a84c;
+  }
+
+  &.panel-admin {
+    background: #f8fafc;
+    border-top: 4px solid #1b3a5c;
+  }
+}
+
+.panel-icon-row {
+  margin-bottom: 16px;
+}
+
+.panel-icon-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #f5f0e8;
+  border: 2px solid #c9a84c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon { color: #c9a84c; font-size: 1.6rem; height: 1.6rem; width: 1.6rem; }
+
+  &.admin-circle {
+    background: #e8f0f8;
+    border-color: #1b3a5c;
+    mat-icon { color: #1b3a5c; }
+  }
+}
+
+.panel-title {
+  margin: 0 0 6px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #1a1a1a;
+}
+
+.panel-desc {
+  margin: 0 0 28px;
+  font-size: 0.875rem;
+  color: #888;
+  line-height: 1.5;
+}
+
+.or-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  width: 48px;
+  background: white;
+  flex-shrink: 0;
+
+  .or-line {
+    flex: 1;
+    width: 1px;
+    background: #e0e0e0;
+  }
+
+  .or-text {
+    padding: 10px 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #bbb;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.submit-btn {
+  height: 48px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #c9a84c !important;
+  color: white !important;
+
+  &.admin-submit {
+    background: #1b3a5c !important;
+  }
+
+  &:disabled {
+    opacity: 0.6 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-panels {
+    flex-direction: column;
+    max-width: 420px;
+  }
+
+  .or-divider {
+    flex-direction: row;
+    width: 100%;
+    padding: 0 24px;
+    height: 40px;
+
+    .or-line { flex: 1; height: 1px; width: auto; }
+    .or-text { padding: 0 12px; }
+  }
+}
+

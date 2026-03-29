@@ -1,0 +1,161 @@
+<!-- SVG Gooey filter definition -->
+<svg class="goo-defs" aria-hidden="true">
+  <defs>
+    <filter id="goo-nav">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur"/>
+      <feColorMatrix in="blur" mode="matrix"
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9" result="goo"/>
+      <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+    </filter>
+    <filter id="goo-dropdown">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+      <feColorMatrix in="blur" mode="matrix"
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo"/>
+      <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="guest-shell">
+  <header class="site-header">
+    <div class="header-inner">
+
+      <!-- Brand (left) -->
+      <a class="brand" routerLink="/home">
+        <mat-icon class="brand-gem">diamond</mat-icon>
+        <span class="brand-name">Wedding</span>
+      </a>
+
+      <!-- Desktop nav (center) -->
+      <nav class="desktop-nav">
+        <a mat-button routerLink="/home" routerLinkActive="nav-active" [routerLinkActiveOptions]="{exact:true}">
+          {{ 'NAV.HOME' | translate }}
+        </a>
+        @if (currentUser()) {
+          <a mat-button routerLink="/about" routerLinkActive="nav-active">{{ 'NAV.ABOUT' | translate }}</a>
+        }
+        @if (modules()?.rsvp && currentUser()) {
+          <a mat-button routerLink="/rsvp" routerLinkActive="nav-active">{{ 'NAV.RSVP' | translate }}</a>
+        }
+        @if (modules()?.gifts && currentUser()) {
+          <a mat-button routerLink="/gifts" routerLinkActive="nav-active">{{ 'NAV.GIFTS' | translate }}</a>
+        }
+      </nav>
+
+      <!-- Right: language switcher + auth -->
+      <div class="header-auth">
+
+        <!-- Language switcher -->
+        <div class="lang-switcher" [class.open]="langMenuOpen()">
+          <button class="lang-trigger" (click)="toggleLangMenu()">
+            <span class="lang-flag">{{ langService.getLangMeta(langService.currentLang()).flag }}</span>
+            <span class="lang-code">{{ langService.currentLang() | uppercase }}</span>
+            <mat-icon class="lang-chevron">expand_more</mat-icon>
+          </button>
+          @if (langMenuOpen()) {
+            <div class="lang-dropdown">
+              @for (lang of supportedLangs; track lang.code) {
+                <button class="lang-option" [class.active]="lang.code === langService.currentLang()" (click)="setLang(lang.code)">
+                  <span>{{ lang.flag }}</span>
+                  <span>{{ lang.label }}</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        @if (currentUser()) {
+          <!-- Gooey account dropdown -->
+          <div class="goo-account" [class.open]="accountOpen()">
+            <button class="goo-account-trigger" (click)="toggleAccount()">
+              <mat-icon>account_circle</mat-icon>
+              <span class="user-label-desktop">{{ currentUser()!.email }}</span>
+              <mat-icon class="chevron">expand_more</mat-icon>
+            </button>
+            <div class="goo-dropdown-wrap" [class.open]="accountOpen()">
+              @if (modules()?.rsvp) {
+                <a class="goo-drop-item" routerLink="/rsvp" (click)="accountOpen.set(false)">
+                  <mat-icon>how_to_reg</mat-icon>
+                  <span>{{ 'NAV.RSVP' | translate }}</span>
+                </a>
+              }
+              @if (modules()?.gifts) {
+                <a class="goo-drop-item" routerLink="/gifts" (click)="accountOpen.set(false)">
+                  <mat-icon>card_giftcard</mat-icon>
+                  <span>{{ 'NAV.GIFTS' | translate }}</span>
+                </a>
+              }
+              <button class="goo-drop-item goo-drop-logout" (click)="logout()">
+                <mat-icon>logout</mat-icon>
+                <span>{{ 'NAV.SIGN_OUT' | translate }}</span>
+              </button>
+            </div>
+          </div>
+        } @else {
+          <button mat-stroked-button class="login-btn" (click)="goToLogin()">
+            <mat-icon>login</mat-icon>
+            {{ 'NAV.LOGIN' | translate }}
+          </button>
+        }
+      </div>
+
+      <!-- Mobile hamburger -->
+      <button class="mobile-hamburger" (click)="toggleMobileMenu()" [attr.aria-label]="'NAV.MENU_ARIA' | translate">
+        <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- Mobile gooey nav panel -->
+  <div class="mobile-nav-panel" [class.open]="mobileMenuOpen()">
+    <div class="goo-nav-wrap" [class.open]="mobileMenuOpen()">
+      <a class="goo-blob blob-home" routerLink="/home"
+         routerLinkActive="blob-active" (click)="closeMobileMenu()">
+        <mat-icon>home</mat-icon>
+        <span>{{ 'NAV.HOME' | translate }}</span>
+      </a>
+      @if (currentUser()) {
+        <a class="goo-blob blob-about" routerLink="/about"
+           routerLinkActive="blob-active" (click)="closeMobileMenu()">
+          <mat-icon>favorite</mat-icon>
+          <span>{{ 'NAV.ABOUT' | translate }}</span>
+        </a>
+      }
+      @if (modules()?.rsvp && currentUser()) {
+        <a class="goo-blob blob-rsvp" routerLink="/rsvp"
+           routerLinkActive="blob-active" (click)="closeMobileMenu()">
+          <mat-icon>how_to_reg</mat-icon>
+          <span>{{ 'NAV.RSVP' | translate }}</span>
+        </a>
+      }
+      @if (modules()?.gifts && currentUser()) {
+        <a class="goo-blob blob-gifts" routerLink="/gifts"
+           routerLinkActive="blob-active" (click)="closeMobileMenu()">
+          <mat-icon>card_giftcard</mat-icon>
+          <span>{{ 'NAV.GIFTS' | translate }}</span>
+        </a>
+      }
+      @if (currentUser()) {
+        <button class="goo-blob blob-logout" (click)="logout(); closeMobileMenu()">
+          <mat-icon>logout</mat-icon>
+          <span>{{ 'NAV.SIGN_OUT' | translate }}</span>
+        </button>
+      } @else {
+        <a class="goo-blob blob-login" routerLink="/login" (click)="closeMobileMenu()">
+          <mat-icon>login</mat-icon>
+          <span>{{ 'NAV.LOGIN' | translate }}</span>
+        </a>
+      }
+    </div>
+  </div>
+
+  <main class="guest-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="site-footer">
+    <mat-icon class="footer-gem">diamond</mat-icon>
+    <span>{{ 'NAV.FOOTER' | translate }}</span>
+  </footer>
+</div>

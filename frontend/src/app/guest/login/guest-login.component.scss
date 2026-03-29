@@ -1,0 +1,104 @@
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #faf9f7;
+  position: relative;
+}
+
+.decorative-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #0d1b2a 0%, #c9a84c 50%, #0d1b2a 100%);
+}
+
+.login-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 32px;
+
+  .brand-icon {
+    font-size: 3rem;
+    height: 3rem;
+    width: 3rem;
+    color: #c9a84c;
+    margin-bottom: 12px;
+  }
+
+  .brand-title {
+    margin: 0 0 8px;
+    font-size: 2.2rem;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    color: #1a1a1a;
+  }
+
+  .brand-sub {
+    margin: 0;
+    color: #666;
+    font-size: 1rem;
+  }
+}
+
+.login-card {
+  width: 100%;
+  border-top: 3px solid #c9a84c;
+  padding: 8px;
+}
+
+.code-field {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.code-input {
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.full-width {
+  width: 100%;
+  display: block;
+}
+
+.submit-btn {
+  height: 48px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.admin-link {
+  margin-top: 24px;
+  color: #999;
+  font-size: 0.85rem;
+
+  a {
+    color: #c9a84c;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

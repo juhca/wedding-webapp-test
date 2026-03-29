@@ -1,0 +1,65 @@
+.page-header { margin-bottom: 28px; }
+.header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+h1 { margin: 0; font-size: 1.7rem; font-weight: 700; color: #0d1b2a; }
+.subtitle { margin: 4px 0 0; color: #7a8a99; font-size: 0.9rem; }
+.actions { display: flex; gap: 8px; }
+.spinner-center { display: flex; justify-content: center; padding: 60px; }
+.full-width-table { width: 100%; }
+
+.desc { color: #9aa5b4; font-size: 0.8rem; }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px;
+  color: #b0bec5;
+  mat-icon { font-size: 3.5rem; height: 3.5rem; width: 3.5rem; margin-bottom: 12px; color: #cfd8dc; }
+  p { margin: 0; }
+}
+
+mat-icon.visible { color: #22c55e; }
+mat-icon.hidden  { color: #d1d5db; }
+
+mat-chip.full {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0) !important;
+  color: #065f46 !important;
+  font-weight: 700 !important;
+  border: 1px solid #6ee7b7 !important;
+  border-radius: 20px !important;
+  font-size: 0.75rem !important;
+}
+
+// ── Expandable rows ───────────────────────────────────────────────────────────
+.gift-row { cursor: default; }
+.gift-row.has-reservations { cursor: pointer; }
+
+.detail-row td { padding: 0 !important; border-bottom: none !important; }
+
+.expand-cell { width: 48px; padding-right: 0 !important; }
+
+.reservers-detail { overflow: hidden; }
+
+.reservers-inner { padding: 0 16px 16px 56px; }
+
+.reservers-title {
+  display: block;
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: #7a8a99; margin-bottom: 8px;
+}
+
+.reservers-table {
+  width: 100%; border-collapse: collapse; font-size: 0.85rem;
+
+  th {
+    text-align: left; padding: 6px 12px;
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: #9aa5b4; background: #f7f8fa;
+    border-bottom: 1px solid #eaecf0;
+  }
+
+  td { padding: 8px 12px; border-bottom: 1px solid #f0f2f5; color: #333; }
+  tr:last-child td { border-bottom: none; }
+}

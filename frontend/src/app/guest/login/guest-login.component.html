@@ -1,0 +1,50 @@
+<div class="login-wrapper">
+  <div class="decorative-top"></div>
+
+  <div class="login-content">
+    <div class="brand">
+      <mat-icon class="brand-icon">diamond</mat-icon>
+      <h1 class="brand-title">You're Invited</h1>
+      <p class="brand-sub">Enter your access code to join the celebration</p>
+    </div>
+
+    <mat-card class="login-card">
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <mat-form-field appearance="outline" class="full-width code-field">
+            <mat-label>Access Code</mat-label>
+            <input
+              matInput
+              formControlName="accessCode"
+              autocomplete="off"
+              placeholder="e.g. FULL5678"
+              class="code-input"
+            />
+            <mat-icon matSuffix>vpn_key</mat-icon>
+            @if (form.get('accessCode')?.hasError('required') && form.get('accessCode')?.touched) {
+              <mat-error>Please enter your access code</mat-error>
+            }
+          </mat-form-field>
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            class="full-width submit-btn"
+            [disabled]="loading"
+          >
+            @if (loading) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              Enter
+            }
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <p class="admin-link">
+      Are you an admin? <a routerLink="/admin-login">Sign in here</a>
+    </p>
+  </div>
+</div>

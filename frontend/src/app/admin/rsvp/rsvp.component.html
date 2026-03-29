@@ -1,0 +1,127 @@
+<div class="page-header">
+  <div class="header-row">
+    <div>
+      <h1>RSVP Management</h1>
+      <p class="subtitle">Guest responses and attendance</p>
+    </div>
+    <button mat-flat-button color="accent" (click)="exportCsv()" [disabled]="exporting()">
+      <mat-icon>download</mat-icon>
+      {{ exporting() ? 'Exporting…' : 'Export Catering CSV' }}
+    </button>
+  </div>
+</div>
+
+@if (summary()) {
+  <div class="summary-row">
+    <mat-card class="mini-stat">
+      <mat-card-content><div class="num">{{ summary()!.totalInvited }}</div><div class="lbl">Invited</div></mat-card-content>
+    </mat-card>
+    <mat-card class="mini-stat attending">
+      <mat-card-content><div class="num">{{ summary()!.totalAttending }}</div><div class="lbl">Attending</div></mat-card-content>
+    </mat-card>
+    <mat-card class="mini-stat not-attending">
+      <mat-card-content><div class="num">{{ summary()!.totalNotAttending }}</div><div class="lbl">Not Attending</div></mat-card-content>
+    </mat-card>
+    <mat-card class="mini-stat pending">
+      <mat-card-content><div class="num">{{ summary()!.pendingResponses }}</div><div class="lbl">Pending</div></mat-card-content>
+    </mat-card>
+    <mat-card class="mini-stat total">
+      <mat-card-content><div class="num">{{ summary()!.totalPeople }}</div><div class="lbl">Total People</div></mat-card-content>
+    </mat-card>
+  </div>
+}
+
+<mat-card>
+  <mat-card-content>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search guests</mat-label>
+      <input matInput [value]="search()" (input)="updateSearch($any($event.target).value)" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    @if (loading()) {
+      <div class="spinner-center"><mat-spinner></mat-spinner></div>
+    } @else if (filteredRsvps().length === 0) {
+      <div class="empty-state">
+        <mat-icon>how_to_reg</mat-icon>
+        <p>No RSVPs found.</p>
+      </div>
+    } @else {
+      <table mat-table [dataSource]="filteredRsvps()" class="full-width-table" multiTemplateDataRows>
+        <ng-container matColumnDef="expand">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let r" class="expand-cell">
+            @if (r.companions?.length) {
+              <button mat-icon-button (click)="toggleRow(r); $event.stopPropagation()" class="expand-btn">
+                <mat-icon>{{ isExpanded(r) ? 'expand_less' : 'expand_more' }}</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Guest</th>
+          <td mat-cell *matCellDef="let r">{{ r.firstName }} {{ r.lastName }}<br /><small>{{ r.email }}</small></td>
+        </ng-container>
+
+        <ng-container matColumnDef="attending">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let r">
+            <mat-chip [class.yes]="r.isAttending" [class.no]="!r.isAttending">
+              <mat-icon>{{ r.isAttending ? 'check_circle' : 'cancel' }}</mat-icon>
+              {{ r.isAttending ? 'Attending' : 'Not Attending' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="totalGuests">
+          <th mat-header-cell *matHeaderCellDef>Total People</th>
+          <td mat-cell *matCellDef="let r">{{ r.totalGuests }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="dietaryRestrictions">
+          <th mat-header-cell *matHeaderCellDef>Dietary</th>
+          <td mat-cell *matCellDef="let r">{{ r.dietaryRestrictions || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="notes">
+          <th mat-header-cell *matHeaderCellDef>Notes</th>
+          <td mat-cell *matCellDef="let r">{{ r.notes || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="respondedAt">
+          <th mat-header-cell *matHeaderCellDef>Responded At</th>
+          <td mat-cell *matCellDef="let r">{{ r.respondedAt ? (r.respondedAt | date:'short') : '—' }}</td>
+        </ng-container>
+
+        <!-- Expandable companion detail -->
+        <ng-container matColumnDef="expandedDetail">
+          <td mat-cell *matCellDef="let r" [attr.colspan]="displayedColumns.length" class="detail-cell">
+            <div class="companion-detail" [@detailExpand]="isExpanded(r) ? 'expanded' : 'collapsed'">
+              <div class="companion-inner">
+                <span class="companions-title">Companions ({{ r.companions.length }})</span>
+                <table class="companions-table">
+                  <thead><tr><th>Name</th><th>Age</th><th>Dietary</th><th>Notes</th></tr></thead>
+                  <tbody>
+                    @for (c of r.companions; track c.id) {
+                      <tr>
+                        <td>{{ c.firstName }} {{ c.lastName }}</td>
+                        <td>{{ c.age ?? '—' }}</td>
+                        <td>{{ c.dietaryRestrictions || '—' }}</td>
+                        <td>{{ c.notes || '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="rsvp-row" [class.has-companions]="row.companions?.length" (click)="row.companions?.length && toggleRow(row)"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+      </table>
+    }
+  </mat-card-content>
+</mat-card>

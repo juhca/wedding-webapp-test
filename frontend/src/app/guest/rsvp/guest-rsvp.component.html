@@ -1,0 +1,279 @@
+@if (loading()) {
+  <div class="spinner-center"><mat-spinner></mat-spinner></div>
+} @else {
+
+  <div class="page-header">
+    <h1>{{ 'RSVP.TITLE' | translate }}</h1>
+    @if (existing()?.respondedAt) {
+      <mat-chip class="responded-chip">
+        <mat-icon matChipAvatar>check_circle</mat-icon>
+        {{ 'RSVP.RESPONDED' | translate }} {{ existing()!.respondedAt | date:'mediumDate' }}
+      </mat-chip>
+    }
+  </div>
+
+  @if (!existing()?.respondedAt) {
+    <div class="rsvp-banner">
+      <mat-icon>celebration</mat-icon>
+      <p>{{ 'RSVP.BANNER' | translate }}</p>
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <!-- Attendance -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'RSVP.ATTENDING_TITLE' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-radio-group formControlName="isAttending" class="radio-group">
+          <label class="radio-option" [class.selected]="form.get('isAttending')?.value === true">
+            <mat-radio-button [value]="true">
+              <div class="radio-label">
+                <mat-icon>check_circle</mat-icon>
+                <div>
+                  <strong>{{ 'RSVP.YES_STRONG' | translate }}</strong>
+                  <p>{{ 'RSVP.YES_SUB' | translate }}</p>
+                </div>
+              </div>
+            </mat-radio-button>
+          </label>
+          <label class="radio-option" [class.selected]="form.get('isAttending')?.value === false">
+            <mat-radio-button [value]="false">
+              <div class="radio-label">
+                <mat-icon>cancel</mat-icon>
+                <div>
+                  <strong>{{ 'RSVP.NO_STRONG' | translate }}</strong>
+                  <p>{{ 'RSVP.NO_SUB' | translate }}</p>
+                </div>
+              </div>
+            </mat-radio-button>
+          </label>
+        </mat-radio-group>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Dietary & Notes + Email + Reminders -->
+    @if (form.get('isAttending')?.value) {
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'RSVP.DETAILS_TITLE' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+
+          <!-- Contact email -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'RSVP.CONTACT_EMAIL' | translate }}</mat-label>
+            <input matInput formControlName="contactEmail"
+                   type="email"
+                   [placeholder]="'RSVP.CONTACT_EMAIL_PLACEHOLDER' | translate" />
+            <mat-hint>{{ 'RSVP.CONTACT_EMAIL_HINT' | translate }}</mat-hint>
+            @if (form.get('contactEmail')?.invalid && form.get('contactEmail')?.touched) {
+              <mat-error>{{ 'RSVP.ERR_EMAIL_INVALID' | translate }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'RSVP.DIETARY' | translate }}</mat-label>
+            <input matInput formControlName="dietaryRestrictions" [placeholder]="'RSVP.DIETARY_PLACEHOLDER' | translate" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'RSVP.NOTES' | translate }}</mat-label>
+            <textarea matInput formControlName="notes" rows="3" [placeholder]="'RSVP.NOTES_PLACEHOLDER' | translate"></textarea>
+          </mat-form-field>
+
+        </mat-card-content>
+
+        <!-- Reminders — shown inside this card once RSVP has been submitted -->
+        @if (existing()?.respondedAt) {
+          <mat-divider></mat-divider>
+          <mat-card-header class="reminders-subheader">
+            <mat-card-title class="reminders-title">
+              <mat-icon>notifications</mat-icon>
+              {{ 'RSVP.REMINDERS_TITLE' | translate }}
+            </mat-card-title>
+            <mat-card-subtitle>{{ 'RSVP.REMINDERS_SUBTITLE' | translate }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+
+            <!-- Existing reminders -->
+            @if (reminders().length > 0) {
+              <div class="reminder-list">
+                @for (r of reminders(); track r.id) {
+                  <div class="reminder-item">
+                    <mat-icon class="reminder-icon">{{ r.isSent ? 'mark_email_read' : 'schedule' }}</mat-icon>
+                    <div class="reminder-text-col">
+                      <span class="reminder-text">
+                        {{ r.value }} {{ unitLabel(r.unit) }} {{ 'RSVP.REMINDER_BEFORE' | translate }}
+                        @if (r.note) { — <em>{{ r.note }}</em> }
+                      </span>
+                      @if (r.overrideEmail) {
+                        <span class="reminder-email">
+                          <mat-icon>mail_outline</mat-icon>{{ r.overrideEmail }}
+                        </span>
+                      }
+                    </div>
+                    <span class="reminder-date">{{ r.scheduledFor | date:'mediumDate' }}</span>
+                    @if (!r.isSent) {
+                      <button mat-icon-button color="warn" (click)="deleteReminder(r.id)"
+                              [attr.aria-label]="'RSVP.DELETE_REMINDER' | translate">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    } @else {
+                      <span class="reminder-sent-badge">{{ 'RSVP.SENT' | translate }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="no-reminders-msg">{{ 'RSVP.NO_REMINDERS' | translate }}</p>
+            }
+
+            <!-- Add reminder button -->
+            @if (!reminderFormOpen()) {
+              <button mat-stroked-button class="add-reminder-btn" (click)="reminderFormOpen.set(true)">
+                <mat-icon>add_alert</mat-icon>
+                {{ 'RSVP.ADD_REMINDER' | translate }}
+              </button>
+            }
+
+            <!-- Collapsible add form -->
+            @if (reminderFormOpen()) {
+              <div class="reminder-add-panel">
+                <form [formGroup]="reminderForm" (ngSubmit)="addReminder()" class="reminder-form">
+
+                  <div class="reminder-timing-row">
+                    <mat-form-field appearance="outline" class="reminder-value-field">
+                      <mat-label>{{ 'RSVP.REMIND_ME' | translate }}</mat-label>
+                      <input matInput formControlName="value" type="number" min="1" max="365" />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="reminder-unit-field">
+                      <mat-label>{{ 'RSVP.UNIT' | translate }}</mat-label>
+                      <mat-select formControlName="unit">
+                        <mat-option [value]="ReminderUnit.Days">{{ 'RSVP.DAYS' | translate }}</mat-option>
+                        <mat-option [value]="ReminderUnit.Weeks">{{ 'RSVP.WEEKS' | translate }}</mat-option>
+                        <mat-option [value]="ReminderUnit.Months">{{ 'RSVP.MONTHS' | translate }}</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    <span class="before-label">{{ 'RSVP.BEFORE_WEDDING' | translate }}</span>
+                  </div>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>{{ 'RSVP.REMINDER_NOTE' | translate }}</mat-label>
+                    <input matInput formControlName="note" [placeholder]="'RSVP.REMINDER_NOTE_PLACEHOLDER' | translate" />
+                  </mat-form-field>
+
+                  <!-- Email: checkbox + optional custom field -->
+                  @if (form.get('contactEmail')?.value) {
+                    <mat-checkbox formControlName="sameEmail" class="same-email-check">
+                      {{ 'RSVP.SAME_EMAIL' | translate }}
+                      <strong>{{ form.get('contactEmail')?.value }}</strong>
+                    </mat-checkbox>
+                  }
+
+                  @if (!reminderForm.get('sameEmail')?.value || !form.get('contactEmail')?.value) {
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>{{ 'RSVP.REMINDER_EMAIL' | translate }}</mat-label>
+                      <input matInput formControlName="customEmail" type="email"
+                             [placeholder]="'RSVP.CONTACT_EMAIL_PLACEHOLDER' | translate" />
+                      @if (reminderForm.get('customEmail')?.invalid && reminderForm.get('customEmail')?.touched) {
+                        <mat-error>{{ 'RSVP.ERR_EMAIL_INVALID' | translate }}</mat-error>
+                      }
+                    </mat-form-field>
+                  }
+
+                  <div class="reminder-actions">
+                    <button mat-flat-button color="primary" type="submit"
+                            [disabled]="reminderForm.invalid || addingReminder()">
+                      <mat-icon>add_alert</mat-icon>
+                      {{ 'RSVP.SET_REMINDER' | translate }}
+                    </button>
+                    <button mat-stroked-button type="button" (click)="reminderFormOpen.set(false)">
+                      {{ 'COMMON.CANCEL' | translate }}
+                    </button>
+                  </div>
+
+                </form>
+              </div>
+            }
+
+          </mat-card-content>
+        }
+      </mat-card>
+
+      <!-- Companions -->
+      @if (maxCompanions > 0) {
+        <mat-card class="section-card">
+          <mat-card-header>
+            <mat-card-title>{{ 'RSVP.COMPANIONS_TITLE' | translate }}</mat-card-title>
+            <mat-card-subtitle>
+              {{ maxCompanions === 1
+                ? ('RSVP.COMPANIONS_LIMIT_ONE' | translate)
+                : ('RSVP.COMPANIONS_LIMIT_MANY' | translate: { count: maxCompanions }) }}
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div formArrayName="companions">
+              @for (companion of companions.controls; track $index; let i = $index) {
+                <div [formGroupName]="i" class="companion-block">
+                  <div class="companion-header">
+                    <span class="companion-title">{{ 'RSVP.COMPANION_N' | translate: { n: i + 1 } }}</span>
+                    <button mat-icon-button type="button" color="warn" (click)="removeCompanion(i)">
+                      <mat-icon>remove_circle</mat-icon>
+                    </button>
+                  </div>
+                  <div class="companion-grid">
+                    <mat-form-field appearance="outline">
+                      <mat-label>{{ 'RSVP.FIRST_NAME' | translate }}</mat-label>
+                      <input matInput formControlName="firstName" />
+                      @if (companion.get('firstName')?.invalid && companion.get('firstName')?.touched) {
+                        <mat-error>{{ 'RSVP.REQUIRED' | translate }}</mat-error>
+                      }
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>{{ 'RSVP.LAST_NAME' | translate }}</mat-label>
+                      <input matInput formControlName="lastName" />
+                      @if (companion.get('lastName')?.invalid && companion.get('lastName')?.touched) {
+                        <mat-error>{{ 'RSVP.REQUIRED' | translate }}</mat-error>
+                      }
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>{{ 'RSVP.AGE' | translate }}</mat-label>
+                      <input matInput formControlName="age" type="number" min="0" max="120" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>{{ 'RSVP.COMPANION_DIETARY' | translate }}</mat-label>
+                      <input matInput formControlName="dietaryRestrictions" />
+                    </mat-form-field>
+                  </div>
+                  <mat-divider></mat-divider>
+                </div>
+              }
+            </div>
+
+            @if (canAddCompanion) {
+              <button mat-stroked-button type="button" (click)="addCompanion()" class="add-companion-btn">
+                <mat-icon>add</mat-icon>
+                {{ 'RSVP.ADD_COMPANION' | translate }}
+              </button>
+            }
+
+            @if (companions.length === 0) {
+              <p class="no-companions">{{ 'RSVP.NO_COMPANIONS' | translate }}</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    }
+
+    <div class="submit-row">
+      <button mat-flat-button color="primary" type="submit" class="submit-btn" [disabled]="saving() || form.invalid">
+        @if (saving()) { <mat-spinner diameter="20"></mat-spinner> } @else { <mat-icon>send</mat-icon> }
+        {{ existing()?.respondedAt ? ('RSVP.UPDATE' | translate) : ('RSVP.SUBMIT' | translate) }}
+      </button>
+    </div>
+  </form>
+}

@@ -1,0 +1,325 @@
+@if (loading()) {
+  <div class="spinner-center"><mat-spinner></mat-spinner></div>
+} @else if (info()) {
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="gold-rule"></div>
+    <p class="hero-label">{{ 'HOME.INVITED' | translate }}</p>
+    <h1 class="couple-names">
+      {{ info()!.brideName }} {{ info()!.brideSurname }}
+      <span class="amp">&amp;</span>
+      {{ info()!.groomName }} {{ info()!.groomSurname }}
+    </h1>
+    <p class="wedding-name">{{ info()!.weddingName }}</p>
+
+    @if (info()!.weddingDate) {
+      <!-- date + countdown stacked in column -->
+      <div class="date-countdown-col">
+        <div class="date-block">
+          <mat-icon>calendar_today</mat-icon>
+          <span>{{ info()!.weddingDate | date:'EEEE, MMMM d, y' }}</span>
+        </div>
+
+        @if (isWeddingDay()) {
+          <div class="today-banner">{{ 'HOME.TODAY' | translate }}</div>
+        } @else if (countdown()) {
+          <div class="countdown">
+            <div class="count-unit">
+              <span class="count-num">{{ countdown()!.d }}</span>
+              <span class="count-label">{{ 'HOME.DAYS' | translate }}</span>
+            </div>
+            <span class="count-colon">:</span>
+            <div class="count-unit">
+              <span class="count-num">{{ pad(countdown()!.h) }}</span>
+              <span class="count-label">{{ 'HOME.HOURS' | translate }}</span>
+            </div>
+            <span class="count-colon">:</span>
+            <div class="count-unit">
+              <span class="count-num">{{ pad(countdown()!.m) }}</span>
+              <span class="count-label">{{ 'HOME.MIN' | translate }}</span>
+            </div>
+            <span class="count-colon">:</span>
+            <div class="count-unit">
+              <span class="count-num">{{ pad(countdown()!.s) }}</span>
+              <span class="count-label">{{ 'HOME.SEC' | translate }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- Calendar export -->
+        <div class="cal-export">
+          <span class="cal-label">{{ 'HOME.ADD_TO_CALENDAR' | translate }}</span>
+          <button mat-stroked-button class="cal-btn google" (click)="addToGoogleCalendar()">
+            <svg class="cal-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#4285F4" d="M21.805 10.023H12v4.273h5.618c-.241 1.277-1.002 2.359-2.13 3.091v2.566h3.45c2.018-1.859 3.182-4.597 3.182-7.832 0-.656-.059-1.288-.165-1.898z"/>
+              <path fill="#34A853" d="M12 22c2.756 0 5.07-.914 6.755-2.477l-3.449-2.567c-.953.638-2.17 1.013-3.306 1.013-2.543 0-4.698-1.717-5.467-4.024H2.98v2.64C4.654 19.869 8.076 22 12 22z"/>
+              <path fill="#FBBC05" d="M6.533 13.945a5.998 5.998 0 0 1 0-3.89V7.414H2.98A10.017 10.017 0 0 0 2 12c0 1.617.387 3.145 1.07 4.496l3.463-2.551z"/>
+              <path fill="#EA4335" d="M12 6.057c1.434 0 2.723.493 3.737 1.46l2.797-2.797C16.703 3.198 14.49 2 12 2 8.076 2 4.654 4.131 2.98 7.414l3.553 2.641C7.302 7.774 9.457 6.057 12 6.057z"/>
+            </svg>
+            {{ 'HOME.GOOGLE' | translate }}
+          </button>
+          <button mat-stroked-button class="cal-btn apple" (click)="downloadIcs('wedding-apple')">
+            <svg class="cal-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+            </svg>
+            {{ 'HOME.APPLE' | translate }}
+          </button>
+          <button mat-stroked-button class="cal-btn ical" (click)="downloadIcs('wedding')">
+            <mat-icon>download</mat-icon>
+            {{ 'HOME.ICAL' | translate }}
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="date-block">
+        <mat-icon>calendar_today</mat-icon>
+        <span>{{ info()!.approximateDate }}</span>
+      </div>
+    }
+
+    @if (info()!.weddingDescription) {
+      <p class="description">{{ info()!.weddingDescription }}</p>
+    }
+    <div class="gold-rule"></div>
+  </div>
+
+  <!-- Locations -->
+  @if (info()!.locationCivil || info()!.locationChurch || (hasFullAccess() && info()!.locationParty)) {
+    <section class="section">
+      <h2 class="section-title"><mat-icon>place</mat-icon> {{ 'HOME.VENUES' | translate }}</h2>
+      <div class="locations">
+        @if (info()!.locationCivil) {
+          <mat-card class="location-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar>gavel</mat-icon>
+              <mat-card-title>{{ 'HOME.CIVIL' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ info()!.locationCivil!.name }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p><mat-icon class="inline-icon">place</mat-icon>{{ info()!.locationCivil!.address }}</p>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-button color="primary" (click)="openMaps(info()!.locationCivil!)">
+                <mat-icon>map</mat-icon> {{ 'HOME.GOOGLE_MAPS' | translate }}
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+
+        @if (info()!.locationChurch) {
+          <mat-card class="location-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar>church</mat-icon>
+              <mat-card-title>{{ 'HOME.CHURCH' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ info()!.locationChurch!.name }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p><mat-icon class="inline-icon">place</mat-icon>{{ info()!.locationChurch!.address }}</p>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-button color="primary" (click)="openMaps(info()!.locationChurch!)">
+                <mat-icon>map</mat-icon> {{ 'HOME.GOOGLE_MAPS' | translate }}
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+
+        @if (hasFullAccess() && info()!.locationParty) {
+          <mat-card class="location-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar>celebration</mat-icon>
+              <mat-card-title>{{ 'HOME.RECEPTION' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ info()!.locationParty!.name }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p><mat-icon class="inline-icon">place</mat-icon>{{ info()!.locationParty!.address }}</p>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-button color="primary" (click)="openMaps(info()!.locationParty!)">
+                <mat-icon>map</mat-icon> {{ 'HOME.GOOGLE_MAPS' | translate }}
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- RSVP Teaser -->
+  @if (modules()?.rsvp) {
+    <section class="section">
+      <h2 class="section-title"><mat-icon>how_to_reg</mat-icon> {{ 'HOME.RSVP_TITLE' | translate }}</h2>
+
+      @if (isLoggedIn()) {
+        <!-- Logged in: show RSVP call-to-action -->
+        <div class="rsvp-preview">
+          <div class="rsvp-preview-content">
+            <mat-icon class="rsvp-icon">event_available</mat-icon>
+            <div>
+              <h3>{{ 'HOME.RSVP_SUBTITLE' | translate }}</h3>
+              <p>{{ 'HOME.RSVP_BODY' | translate }}</p>
+            </div>
+          </div>
+          <a mat-flat-button routerLink="/rsvp" class="rsvp-btn">
+            <mat-icon>how_to_reg</mat-icon>
+            {{ 'HOME.RSVP_BTN' | translate }}
+          </a>
+        </div>
+      } @else {
+        <!-- Not logged in: teaser with lock -->
+        <div class="rsvp-preview locked">
+          <div class="rsvp-preview-content">
+            <mat-icon class="rsvp-icon">how_to_reg</mat-icon>
+            <div>
+              <h3>{{ 'HOME.RSVP_SUBTITLE' | translate }}</h3>
+              <p>{{ 'HOME.RSVP_ANON_BODY' | translate }}</p>
+              <ul class="rsvp-features">
+                <li><mat-icon>check</mat-icon> {{ 'HOME.RSVP_ANON_ITEM1' | translate }}</li>
+                <li><mat-icon>check</mat-icon> {{ 'HOME.RSVP_ANON_ITEM2' | translate }}</li>
+                <li><mat-icon>check</mat-icon> {{ 'HOME.RSVP_ANON_ITEM3' | translate }}</li>
+              </ul>
+            </div>
+          </div>
+          <a mat-flat-button routerLink="/login" class="rsvp-btn">
+            <mat-icon>login</mat-icon>
+            {{ 'HOME.RSVP_ANON_BTN' | translate }}
+          </a>
+        </div>
+      }
+    </section>
+  }
+
+  <!-- Gifts Teaser -->
+  @if (modules()?.gifts) {
+    <section class="section">
+      <h2 class="section-title"><mat-icon>card_giftcard</mat-icon> {{ 'HOME.GIFTS_TITLE' | translate }}</h2>
+      <p class="section-sub">{{ 'HOME.GIFTS_SUBTITLE' | translate }}</p>
+
+      <div class="gifts-preview-grid">
+        @for (gift of previewGifts(); track gift.id) {
+          <mat-card class="gift-preview-card" [class.blurred]="!isLoggedIn()">
+            <div class="gift-preview-img">
+              @if (gift.imageUrl) {
+                <img [src]="gift.imageUrl" [alt]="gift.name" />
+              } @else {
+                <mat-icon>card_giftcard</mat-icon>
+              }
+            </div>
+            <mat-card-header>
+              <mat-card-title>{{ gift.name }}</mat-card-title>
+              @if (gift.price != null) {
+                <mat-card-subtitle>€{{ gift.price }}</mat-card-subtitle>
+              }
+            </mat-card-header>
+            @if (gift.description) {
+              <mat-card-content>
+                <p class="gift-desc">{{ gift.description }}</p>
+              </mat-card-content>
+            }
+          </mat-card>
+        }
+      </div>
+
+      <div class="gifts-preview-cta">
+        @if (isLoggedIn()) {
+          <a mat-flat-button routerLink="/gifts" class="gifts-btn">
+            <mat-icon>card_giftcard</mat-icon>
+            {{ 'HOME.GIFTS_BTN' | translate }}
+          </a>
+        } @else {
+          <div class="gifts-lock">
+            <mat-icon>lock</mat-icon>
+            <p>{{ 'HOME.GIFTS_ANON_BODY' | translate }}</p>
+            <a mat-flat-button routerLink="/login" class="gifts-btn">
+              <mat-icon>login</mat-icon>
+              {{ 'HOME.GIFTS_ANON_BTN' | translate }}
+            </a>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Guest Book — placeholder for future feature, visible to logged-in users -->
+  @if (isLoggedIn()) {
+    <section class="section">
+      <h2 class="section-title"><mat-icon>menu_book</mat-icon> {{ 'HOME.GUESTBOOK_TITLE' | translate }}</h2>
+      <div class="feature-teaser">
+        <span class="soon-chip">{{ 'HOME.COMING_SOON' | translate }}</span>
+        <div class="feature-teaser-content">
+          <mat-icon class="feature-icon">menu_book</mat-icon>
+          <div>
+            <h3>{{ 'HOME.GUESTBOOK_SUBTITLE' | translate }}</h3>
+            <p>{{ 'HOME.GUESTBOOK_BODY' | translate }}</p>
+          </div>
+        </div>
+        <button mat-flat-button disabled class="feature-btn-disabled">
+          <mat-icon>edit</mat-icon>
+          {{ 'HOME.GUESTBOOK_BTN' | translate }}
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- Music Wishes — placeholder, full experience only -->
+  @if (hasFullAccess()) {
+    <section class="section">
+      <h2 class="section-title"><mat-icon>music_note</mat-icon> {{ 'HOME.MUSIC_TITLE' | translate }}</h2>
+      <div class="feature-teaser">
+        <span class="soon-chip">{{ 'HOME.COMING_SOON' | translate }}</span>
+        <div class="feature-teaser-content">
+          <mat-icon class="feature-icon">queue_music</mat-icon>
+          <div>
+            <h3>{{ 'HOME.MUSIC_SUBTITLE' | translate }}</h3>
+            <p>{{ 'HOME.MUSIC_BODY' | translate }}</p>
+          </div>
+        </div>
+        <button mat-flat-button disabled class="feature-btn-disabled">
+          <mat-icon>music_note</mat-icon>
+          {{ 'HOME.MUSIC_BTN' | translate }}
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- Live Stream — placeholder, visible to logged-in users -->
+  @if (isLoggedIn()) {
+    <section class="section">
+      <h2 class="section-title"><mat-icon>live_tv</mat-icon> {{ 'HOME.STREAM_TITLE' | translate }}</h2>
+      <div class="feature-teaser">
+        <span class="soon-chip">{{ 'HOME.COMING_SOON' | translate }}</span>
+        <div class="feature-teaser-content">
+          <mat-icon class="feature-icon">live_tv</mat-icon>
+          <div>
+            <h3>{{ 'HOME.STREAM_SUBTITLE' | translate }}</h3>
+            <p>{{ 'HOME.STREAM_BODY' | translate }}</p>
+          </div>
+        </div>
+        <button mat-flat-button disabled class="feature-btn-disabled">
+          <mat-icon>play_circle</mat-icon>
+          {{ 'HOME.STREAM_BTN' | translate }}
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- Newsletter — public, visible to everyone -->
+  <section class="section">
+    <h2 class="section-title"><mat-icon>mail_outline</mat-icon> {{ 'HOME.NEWSLETTER_TITLE' | translate }}</h2>
+    <div class="feature-teaser newsletter-teaser">
+      <span class="soon-chip">{{ 'HOME.COMING_SOON' | translate }}</span>
+      <div class="feature-teaser-content">
+        <mat-icon class="feature-icon">photo_album</mat-icon>
+        <div>
+          <h3>{{ 'HOME.NEWSLETTER_SUBTITLE' | translate }}</h3>
+          <p>{{ 'HOME.NEWSLETTER_BODY' | translate }}</p>
+        </div>
+      </div>
+      <button mat-flat-button disabled class="feature-btn-disabled">
+        <mat-icon>mail_outline</mat-icon>
+        {{ 'HOME.NEWSLETTER_BTN' | translate }}
+      </button>
+    </div>
+  </section>
+}

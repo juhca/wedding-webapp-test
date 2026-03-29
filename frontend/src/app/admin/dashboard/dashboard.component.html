@@ -1,0 +1,100 @@
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <p class="subtitle">Wedding overview at a glance</p>
+</div>
+
+@if (loading()) {
+  <div class="spinner-center">
+    <mat-spinner></mat-spinner>
+  </div>
+} @else if (error()) {
+  <mat-card class="error-card">
+    <mat-card-content>
+      <mat-icon color="warn">error</mat-icon>
+      {{ error() }}
+    </mat-card-content>
+  </mat-card>
+} @else if (summary()) {
+  <div class="stats-grid">
+    <mat-card class="stat-card invited">
+      <mat-card-content>
+        <div class="stat-icon"><mat-icon>people</mat-icon></div>
+        <div class="stat-value">{{ summary()!.totalInvited }}</div>
+        <div class="stat-label">Total Invited</div>
+      </mat-card-content>
+      <mat-icon class="stat-watermark">people</mat-icon>
+    </mat-card>
+
+    <mat-card class="stat-card responded">
+      <mat-card-content>
+        <div class="stat-icon"><mat-icon>mark_email_read</mat-icon></div>
+        <div class="stat-value">{{ summary()!.totalResponded }}</div>
+        <div class="stat-label">Responded</div>
+      </mat-card-content>
+      <mat-icon class="stat-watermark">mark_email_read</mat-icon>
+    </mat-card>
+
+    <mat-card class="stat-card attending">
+      <mat-card-content>
+        <div class="stat-icon"><mat-icon>check_circle</mat-icon></div>
+        <div class="stat-value">{{ summary()!.totalAttending }}</div>
+        <div class="stat-label">Attending</div>
+      </mat-card-content>
+      <mat-icon class="stat-watermark">check_circle</mat-icon>
+    </mat-card>
+
+    <mat-card class="stat-card not-attending">
+      <mat-card-content>
+        <div class="stat-icon"><mat-icon>cancel</mat-icon></div>
+        <div class="stat-value">{{ summary()!.totalNotAttending }}</div>
+        <div class="stat-label">Not Attending</div>
+      </mat-card-content>
+      <mat-icon class="stat-watermark">cancel</mat-icon>
+    </mat-card>
+
+    <mat-card class="stat-card pending">
+      <mat-card-content>
+        <div class="stat-icon"><mat-icon>hourglass_empty</mat-icon></div>
+        <div class="stat-value">{{ summary()!.pendingResponses }}</div>
+        <div class="stat-label">Pending</div>
+      </mat-card-content>
+      <mat-icon class="stat-watermark">hourglass_empty</mat-icon>
+    </mat-card>
+
+    <mat-card class="stat-card total-people">
+      <mat-card-content>
+        <div class="stat-icon"><mat-icon>group</mat-icon></div>
+        <div class="stat-value">{{ summary()!.totalPeople }}</div>
+        <div class="stat-label">Total People</div>
+      </mat-card-content>
+      <mat-icon class="stat-watermark">group</mat-icon>
+    </mat-card>
+  </div>
+}
+
+@if (modules()) {
+  <mat-card class="modules-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>settings</mat-icon>
+        Active Modules
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="chips-row">
+        <mat-chip [class.enabled]="modules()!.rsvp" [class.disabled]="!modules()!.rsvp">
+          <mat-icon matChipAvatar>how_to_reg</mat-icon>
+          RSVP {{ modules()!.rsvp ? 'Enabled' : 'Disabled' }}
+        </mat-chip>
+        <mat-chip [class.enabled]="modules()!.gifts" [class.disabled]="!modules()!.gifts">
+          <mat-icon matChipAvatar>card_giftcard</mat-icon>
+          Gifts {{ modules()!.gifts ? 'Enabled' : 'Disabled' }}
+        </mat-chip>
+        <mat-chip [class.enabled]="modules()!.reminders" [class.disabled]="!modules()!.reminders">
+          <mat-icon matChipAvatar>notifications</mat-icon>
+          Reminders {{ modules()!.reminders ? 'Enabled' : 'Disabled' }}
+        </mat-chip>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}

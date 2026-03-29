@@ -1,0 +1,95 @@
+<div class="page-header">
+  <div class="header-row">
+    <div>
+      <h1>Wedding Info</h1>
+      <p class="subtitle">{{ isNew() ? 'Initialize your wedding details' : 'Edit wedding details' }}</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="save()" [disabled]="saving() || form.invalid">
+      @if (saving()) { <mat-spinner diameter="20"></mat-spinner> } @else { <mat-icon>save</mat-icon> }
+      {{ isNew() ? 'Initialize' : 'Save Changes' }}
+    </button>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="spinner-center"><mat-spinner></mat-spinner></div>
+} @else {
+  <form [formGroup]="form">
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title><mat-icon>favorite</mat-icon> Couple & Basic Info</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div class="grid-2">
+          <mat-form-field appearance="outline"><mat-label>Bride First Name</mat-label><input matInput formControlName="brideName" /><mat-error>Required</mat-error></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Bride Last Name</mat-label><input matInput formControlName="brideSurname" /><mat-error>Required</mat-error></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Groom First Name</mat-label><input matInput formControlName="groomName" /><mat-error>Required</mat-error></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Groom Last Name</mat-label><input matInput formControlName="groomSurname" /><mat-error>Required</mat-error></mat-form-field>
+        </div>
+        <div class="grid-2">
+          <mat-form-field appearance="outline"><mat-label>Approximate Date (e.g. Summer 2027)</mat-label><input matInput formControlName="approximateDate" /><mat-error>Required</mat-error></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Wedding Date</mat-label><input matInput formControlName="weddingDate" type="date" /></mat-form-field>
+        </div>
+        <mat-form-field appearance="outline" class="full-width"><mat-label>Wedding Name</mat-label><input matInput formControlName="weddingName" placeholder="Ana &amp; Marko's Wedding" /></mat-form-field>
+        <mat-form-field appearance="outline" class="full-width"><mat-label>Wedding Description</mat-label><textarea matInput formControlName="weddingDescription" rows="3"></textarea></mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-accordion class="locations-accordion">
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title><mat-icon>gavel</mat-icon>&nbsp; Civil Ceremony Location</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="grid-2">
+          <mat-form-field appearance="outline"><mat-label>Name</mat-label><input matInput formControlName="civilLocationName" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Address</mat-label><input matInput formControlName="civilLocationAddress" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Latitude</mat-label><input matInput formControlName="civilLocationLatitude" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Longitude</mat-label><input matInput formControlName="civilLocationLongitude" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Google Maps URL</mat-label><input matInput formControlName="civilLocationGoogleMapsUrl" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Apple Maps URL</mat-label><input matInput formControlName="civilLocationAppleMapsUrl" /></mat-form-field>
+        </div>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title><mat-icon>church</mat-icon>&nbsp; Church Ceremony Location</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="grid-2">
+          <mat-form-field appearance="outline"><mat-label>Name</mat-label><input matInput formControlName="churchLocationName" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Address</mat-label><input matInput formControlName="churchLocationAddress" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Latitude</mat-label><input matInput formControlName="churchLocationLatitude" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Longitude</mat-label><input matInput formControlName="churchLocationLongitude" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Google Maps URL</mat-label><input matInput formControlName="churchLocationGoogleMapsUrl" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Apple Maps URL</mat-label><input matInput formControlName="churchLocationAppleMapsUrl" /></mat-form-field>
+        </div>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title><mat-icon>celebration</mat-icon>&nbsp; Party / Reception Location</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="grid-2">
+          <mat-form-field appearance="outline"><mat-label>Name</mat-label><input matInput formControlName="partyLocationName" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Address</mat-label><input matInput formControlName="partyLocationAddress" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Latitude</mat-label><input matInput formControlName="partyLocationLatitude" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Longitude</mat-label><input matInput formControlName="partyLocationLongitude" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Google Maps URL</mat-label><input matInput formControlName="partyLocationGoogleMapsUrl" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Apple Maps URL</mat-label><input matInput formControlName="partyLocationAppleMapsUrl" /></mat-form-field>
+        </div>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title><mat-icon>home</mat-icon>&nbsp; House Location (Admin only)</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="grid-2">
+          <mat-form-field appearance="outline"><mat-label>Name</mat-label><input matInput formControlName="houseLocationName" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Address</mat-label><input matInput formControlName="houseLocationAddress" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Latitude</mat-label><input matInput formControlName="houseLocationLatitude" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Longitude</mat-label><input matInput formControlName="houseLocationLongitude" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Google Maps URL</mat-label><input matInput formControlName="houseLocationGoogleMapsUrl" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Apple Maps URL</mat-label><input matInput formControlName="houseLocationAppleMapsUrl" /></mat-form-field>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </form>
+}
+

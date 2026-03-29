@@ -1,0 +1,143 @@
+<div class="login-page">
+
+  <!-- Hidden SVG goo filter (used by nothing here, but available) -->
+  <svg style="position:absolute;width:0;height:0;overflow:hidden;">
+    <defs>
+      <filter id="goo">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+        <feColorMatrix in="blur" mode="matrix"
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo"/>
+        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Language switcher top-right -->
+  <div class="login-lang-switcher" [class.open]="langMenuOpen">
+    <button class="lang-trigger" (click)="langMenuOpen = !langMenuOpen">
+      <span>{{ langService.getLangMeta(langService.currentLang()).flag }}</span>
+      <span>{{ langService.currentLang() | uppercase }}</span>
+      <mat-icon>expand_more</mat-icon>
+    </button>
+    @if (langMenuOpen) {
+      <div class="lang-dropdown">
+        @for (lang of supportedLangs; track lang.code) {
+          <button class="lang-option" [class.active]="lang.code === langService.currentLang()" (click)="setLang(lang.code)">
+            <span>{{ lang.flag }}</span>
+            <span>{{ lang.label }}</span>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="login-brand">
+    <mat-icon class="brand-gem">diamond</mat-icon>
+    <h1 class="brand-title">{{ 'LOGIN.WELCOME' | translate }}</h1>
+    <p class="brand-sub">{{ 'LOGIN.HOW_ACCESS' | translate }}</p>
+  </div>
+
+  <div class="login-panels">
+
+    <!-- ── Guest Panel ── -->
+    <div class="panel panel-guest">
+      <div class="panel-icon-row">
+        <div class="panel-icon-circle">
+          <mat-icon>vpn_key</mat-icon>
+        </div>
+      </div>
+      <h2 class="panel-title">{{ 'LOGIN.IM_GUEST' | translate }}</h2>
+      <p class="panel-desc">{{ 'LOGIN.GUEST_HINT' | translate }}</p>
+
+      <form [formGroup]="guestForm" (ngSubmit)="submitGuest()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'LOGIN.ACCESS_CODE' | translate }}</mat-label>
+          <input
+            matInput
+            formControlName="accessCode"
+            autocomplete="off"
+            [placeholder]="'LOGIN.PLACEHOLDER_CODE' | translate"
+          />
+          <mat-icon matSuffix>lock_open</mat-icon>
+          @if (guestForm.get('accessCode')?.hasError('required') && guestForm.get('accessCode')?.touched) {
+            <mat-error>{{ 'LOGIN.ERR_CODE_REQUIRED' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          type="submit"
+          class="full-width submit-btn"
+          [disabled]="guestLoading"
+        >
+          @if (guestLoading) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            {{ 'LOGIN.BTN_ENTER' | translate }}
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- ── Divider ── -->
+    <div class="or-divider">
+      <div class="or-line"></div>
+      <span class="or-text">{{ 'LOGIN.OR' | translate }}</span>
+      <div class="or-line"></div>
+    </div>
+
+    <!-- ── Admin Panel ── -->
+    <div class="panel panel-admin">
+      <div class="panel-icon-row">
+        <div class="panel-icon-circle admin-circle">
+          <mat-icon>admin_panel_settings</mat-icon>
+        </div>
+      </div>
+      <h2 class="panel-title">{{ 'LOGIN.ORGANIZER' | translate }}</h2>
+      <p class="panel-desc">{{ 'LOGIN.ADMIN_HINT' | translate }}</p>
+
+      <form [formGroup]="adminForm" (ngSubmit)="submitAdmin()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'LOGIN.EMAIL' | translate }}</mat-label>
+          <input matInput formControlName="email" type="email" autocomplete="email" />
+          <mat-icon matSuffix>email</mat-icon>
+          @if (adminForm.get('email')?.hasError('required') && adminForm.get('email')?.touched) {
+            <mat-error>{{ 'LOGIN.ERR_EMAIL_REQUIRED' | translate }}</mat-error>
+          }
+          @if (adminForm.get('email')?.hasError('email') && adminForm.get('email')?.touched) {
+            <mat-error>{{ 'LOGIN.ERR_EMAIL_INVALID' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'LOGIN.PASSWORD' | translate }}</mat-label>
+          <input
+            matInput
+            formControlName="password"
+            [type]="hidePassword ? 'password' : 'text'"
+            autocomplete="current-password"
+          />
+          <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (adminForm.get('password')?.hasError('required') && adminForm.get('password')?.touched) {
+            <mat-error>{{ 'LOGIN.ERR_PASSWORD_REQUIRED' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          type="submit"
+          class="full-width submit-btn admin-submit"
+          [disabled]="adminLoading"
+        >
+          @if (adminLoading) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            {{ 'LOGIN.BTN_SIGN_IN' | translate }}
+          }
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

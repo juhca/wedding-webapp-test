@@ -1,0 +1,35 @@
+.page-header { margin-bottom: 28px; }
+.header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+h1 { margin: 0; font-size: 1.7rem; font-weight: 700; color: #0d1b2a; }
+.subtitle { margin: 4px 0 0; color: #7a8a99; font-size: 0.9rem; }
+.spinner-center { display: flex; justify-content: center; padding: 60px; }
+.full-width-table { width: 100%; }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px;
+  color: #b0bec5;
+  mat-icon { font-size: 3.5rem; height: 3.5rem; width: 3.5rem; margin-bottom: 12px; color: #cfd8dc; }
+  p { margin: 0; font-size: 0.9rem; }
+}
+
+code {
+  background: #f0f2f5;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  color: #1b3a5c;
+  font-family: 'Courier New', monospace;
+  border: 1px solid #e2e6ea;
+}
+
+// Role chips
+mat-chip {
+  border-radius: 20px !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  height: 26px !important;
+  padding: 0 10px !important;
+}

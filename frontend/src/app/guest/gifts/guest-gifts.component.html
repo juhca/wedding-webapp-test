@@ -1,0 +1,117 @@
+@if (loading()) {
+  <div class="spinner-center"><mat-spinner></mat-spinner></div>
+} @else {
+  <div class="page-header">
+    <h1>{{ 'GIFTS.TITLE' | translate }}</h1>
+    <p class="subtitle">{{ 'GIFTS.SUBTITLE' | translate }}</p>
+  </div>
+
+  @if (isExample()) {
+    <div class="example-notice">
+      <mat-icon>info</mat-icon>
+      <span>{{ 'GIFTS.EXAMPLE_NOTICE' | translate }}</span>
+    </div>
+  }
+
+  <mat-tab-group>
+    <mat-tab [label]="'GIFTS.TAB_ALL' | translate: { count: gifts().length }">
+      @if (gifts().length === 0) {
+        <div class="empty-state">
+          <mat-icon>card_giftcard</mat-icon>
+          <p>{{ 'GIFTS.EMPTY_ALL' | translate }}</p>
+        </div>
+      } @else {
+        <div class="gifts-grid">
+          @for (gift of gifts(); track gift.id) {
+            <mat-card class="gift-card" [class.fully-reserved]="gift.isFullyReserved && !gift.isReservedByMe" [class.my-reserved]="gift.isReservedByMe">
+              @if (gift.imageUrl) {
+                <img mat-card-image [src]="gift.imageUrl" [alt]="gift.name" class="gift-image" />
+              } @else {
+                <div class="gift-placeholder"><mat-icon>card_giftcard</mat-icon></div>
+              }
+
+              <mat-card-header>
+                <mat-card-title>{{ gift.name }}</mat-card-title>
+                @if (gift.price != null) {
+                  <mat-card-subtitle>€{{ gift.price }}</mat-card-subtitle>
+                }
+              </mat-card-header>
+
+              <mat-card-content>
+                @if (gift.description) {
+                  <p class="desc">{{ gift.description }}</p>
+                }
+                <div class="status-row">
+                  @if (gift.isReservedByMe) {
+                    <mat-chip class="chip-mine"><mat-icon matChipAvatar>check</mat-icon> {{ 'GIFTS.RESERVED_BY_YOU' | translate }}</mat-chip>
+                  } @else if (gift.isFullyReserved) {
+                    <mat-chip class="chip-full">{{ 'GIFTS.FULLY_RESERVED' | translate }}</mat-chip>
+                  } @else {
+                    <mat-chip class="chip-available">{{ gift.reservationStatus }}</mat-chip>
+                  }
+                </div>
+              </mat-card-content>
+
+              <mat-card-actions>
+                @if (gift.purchaseLink && !gift.isReservedByMe) {
+                  <a mat-button [href]="gift.purchaseLink" target="_blank">
+                    <mat-icon>open_in_new</mat-icon> {{ 'GIFTS.BTN_VIEW' | translate }}
+                  </a>
+                }
+                @if (!gift.isFullyReserved || gift.isReservedByMe) {
+                  <button
+                    mat-flat-button
+                    [color]="gift.isReservedByMe ? 'warn' : 'primary'"
+                    (click)="openReserve(gift)"
+                    class="reserve-btn"
+                  >
+                    <ng-container *ngIf="gift.isReservedByMe">
+                      <mat-icon>bookmark_remove</mat-icon> {{ 'GIFTS.BTN_UNRESERVE' | translate }}
+                    </ng-container>
+                    <ng-container *ngIf="!gift.isReservedByMe">
+                      <mat-icon>bookmark_add</mat-icon> {{ 'GIFTS.BTN_RESERVE' | translate }}
+                    </ng-container>
+                  </button>
+                }
+              </mat-card-actions>
+            </mat-card>
+          }
+        </div>
+      }
+    </mat-tab>
+
+    <mat-tab [label]="'GIFTS.TAB_MINE' | translate: { count: myGifts().length }">
+      @if (myGifts().length === 0) {
+        <div class="empty-state">
+          <mat-icon>bookmark_border</mat-icon>
+          <p>{{ 'GIFTS.EMPTY_MINE' | translate }}</p>
+        </div>
+      } @else {
+        <div class="gifts-grid">
+          @for (gift of myGifts(); track gift.id) {
+            <mat-card class="gift-card my-reserved">
+              <mat-card-header>
+                <mat-icon mat-card-avatar>bookmark</mat-icon>
+                <mat-card-title>{{ gift.name }}</mat-card-title>
+                @if (gift.price != null) { <mat-card-subtitle>€{{ gift.price }}</mat-card-subtitle> }
+              </mat-card-header>
+              <mat-card-content>
+                @if (gift.description) { <p class="desc">{{ gift.description }}</p> }
+                @if (gift.purchaseLink) {
+                  <a [href]="gift.purchaseLink" target="_blank" class="buy-link">
+                    <mat-icon>open_in_new</mat-icon> {{ 'GIFTS.PURCHASE_LINK' | translate }}
+                  </a>
+                }
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-stroked-button color="warn" (click)="openReserve(gift)">
+                  <mat-icon>bookmark_remove</mat-icon> {{ 'GIFTS.BTN_UNRESERVE' | translate }}
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          }
+        </div>
+      }
+    </mat-tab>
+  </mat-tab-group>
+}
