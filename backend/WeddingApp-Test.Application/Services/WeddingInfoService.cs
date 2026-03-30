@@ -1,12 +1,11 @@
-﻿using AutoMapper;
-using WeddingApp_Test.Application.DTO.WeddingInfo;
+﻿using WeddingApp_Test.Application.DTO.WeddingInfo;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Domain.Enums;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository, IMapper mapper) : IWeddingInfoService
+public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository) : IWeddingInfoService
 {
     public async Task<WeddingInfoDto?> GetWeddingInfoAsync(UserRole? userRole)
     {
@@ -97,7 +96,7 @@ public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository, IM
         {
             throw new InvalidOperationException("Wedding info not initialized. Call InitializeWeddingInfoAsync first.");
         }
-        mapper.Map(dto, weddingInfo);
+        ApplyDto(dto, weddingInfo);
         weddingInfo.UpdatedByUserId = updatedByUserId;
         await weddingInfoRepository.UpdateAsync(weddingInfo);
         
@@ -112,12 +111,50 @@ public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository, IM
             throw new InvalidOperationException("Wedding info already exists. Use UpdateWeddingInfoAsync instead.");
         }
         
-        var weddingInfo = mapper.Map<WeddingInfo>(dto);
+        var weddingInfo = new WeddingInfo();
+        ApplyDto(dto, weddingInfo);
         weddingInfo.Id = Guid.NewGuid();
         weddingInfo.UpdatedByUserId = createdByUserId;
         
         await weddingInfoRepository.CreateAsync(weddingInfo);
         
         return await GetWeddingInfoAsync(UserRole.Admin);
+    }
+
+    private static void ApplyDto(WeddingInfoUpdateDto dto, WeddingInfo entity)
+    {
+        entity.BrideName = dto.BrideName;
+        entity.BrideSurname = dto.BrideSurname;
+        entity.GroomName = dto.GroomName;
+        entity.GroomSurname = dto.GroomSurname;
+        entity.ApproximateDate = dto.ApproximateDate;
+        entity.WeddingName = dto.WeddingName;
+        entity.WeddingDescription = dto.WeddingDescription;
+        entity.WeddingDate = dto.WeddingDate;
+        entity.CivilLocationName = dto.CivilLocationName;
+        entity.CivilLocationAddress = dto.CivilLocationAddress;
+        entity.CivilLocationLatitude = dto.CivilLocationLatitude;
+        entity.CivilLocationLongitude = dto.CivilLocationLongitude;
+        entity.CivilLocationGoogleMapsUrl = dto.CivilLocationGoogleMapsUrl;
+        entity.CivilLocationAppleMapsUrl = dto.CivilLocationAppleMapsUrl;
+        entity.ChurchLocationName = dto.ChurchLocationName;
+        entity.ChurchLocationAddress = dto.ChurchLocationAddress;
+        entity.ChurchLocationLatitude = dto.ChurchLocationLatitude;
+        entity.ChurchLocationLongitude = dto.ChurchLocationLongitude;
+        entity.ChurchLocationGoogleMapsUrl = dto.ChurchLocationGoogleMapsUrl;
+        entity.ChurchLocationAppleMapsUrl = dto.ChurchLocationAppleMapsUrl;
+        entity.PartyLocationName = dto.PartyLocationName;
+        entity.PartyLocationAddress = dto.PartyLocationAddress;
+        entity.PartyLocationLatitude = dto.PartyLocationLatitude;
+        entity.PartyLocationLongitude = dto.PartyLocationLongitude;
+        entity.PartyLocationGoogleMapsUrl = dto.PartyLocationGoogleMapsUrl;
+        entity.PartyLocationAppleMapsUrl = dto.PartyLocationAppleMapsUrl;
+        entity.LivestreamUrl = dto.LivestreamUrl;
+        entity.HouseLocationName = dto.HouseLocationName;
+        entity.HouseLocationAddress = dto.HouseLocationAddress;
+        entity.HouseLocationLatitude = dto.HouseLocationLatitude;
+        entity.HouseLocationLongitude = dto.HouseLocationLongitude;
+        entity.HouseLocationGoogleMapsUrl = dto.HouseLocationGoogleMapsUrl;
+        entity.HouseLocationAppleMapsUrl = dto.HouseLocationAppleMapsUrl;
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace WeddingApp_Test.Application.DTO.Gift;
+﻿using WeddingApp_Test.Domain.Entities;
+
+namespace WeddingApp_Test.Application.DTO.Gift;
 
 public class GiftReservationDto
 {
@@ -10,4 +12,18 @@ public class GiftReservationDto
     public string? Notes { get; set; }
     public bool ReminderRequested { get; set; }
     public DateTime? ReminderScheduledFor { get; set; }
+
+    public GiftReservationDto() { }
+
+    public GiftReservationDto(GiftReservation r)
+    {
+        Id = r.Id;
+        GiftId = r.GiftId;
+        ReservedByUserId = r.ReservedByUserId;
+        ReservedByName = $"{r.ReservedBy.FirstName} {r.ReservedBy.LastName}";
+        ReservedAt = r.ReservedAt;
+        Notes = r.Notes;
+        ReminderRequested = r.ReminderRequested;
+        ReminderScheduledFor = r.ReminderScheduledFor;
+    }
 }

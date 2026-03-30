@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WeddingApp_Test.API.BackgroundServices;
 using WeddingApp_Test.Application.Interfaces;
-using WeddingApp_Test.Application.Mappings;
 using WeddingApp_Test.Application.Services;
 using WeddingApp_Test.Infrastructure.Data;
 using WeddingApp_Test.Infrastructure.Email;
@@ -61,12 +60,6 @@ builder.Services.AddSingleton<WeddingApp_Test.API.Services.CountdownImageService
 // Background services
 builder.Services.AddHostedService<EmailSchedulerService>();
 
-
-// AutoMapper
-builder.Services.AddAutoMapper(
-    cfg => { },  // prazna konfiguracija
-    typeof(AutoMapperProfile).Assembly
-);
 
 // JWT Authentication
 builder.Services.AddAuthentication(options =>

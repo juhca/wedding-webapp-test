@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using WeddingApp_Test.Application.DTO.Gift;
 using WeddingApp_Test.Application.Interfaces;
@@ -7,23 +6,12 @@ using WeddingApp_Test.Domain.Entities;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IMapper mapper, IEmailDispatchService emailDispatch) : IGiftService
+public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IEmailDispatchService emailDispatch) : IGiftService
 {
     public async Task<IEnumerable<GiftDto>> GetAllVisibleAsync(Guid? currentUserId = null)
     {
         var gifts = await giftRepository.GetVisibleAsync();
-        var dtos = mapper.Map<IEnumerable<GiftDto>>(gifts).ToList();
-
-        if (currentUserId.HasValue)
-        {
-            foreach (var dto in dtos)
-            {
-                var gift = gifts.First(g => g.Id == dto.Id);
-                dto.IsReservedByMe = gift.Reservations.Any(r => r.ReservedByUserId == currentUserId.Value);
-            }
-        }
-
-        return dtos;
+        return gifts.Select(g => new GiftDto(g, currentUserId));
     }
 
     public async Task<GiftDto> GetByIdAsync(Guid id, Guid? currentUserId = null)
@@ -35,26 +23,29 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
             throw new KeyNotFoundException($"Gift with ID {id} not found");
         }
         
-        var dto = mapper.Map<GiftDto>(gift);
-        
-        if (currentUserId.HasValue)
-        {
-            dto.IsReservedByMe = gift.Reservations.Any(r => r.ReservedByUserId == currentUserId.Value);
-        }
-        
-        return dto;
+        return new GiftDto(gift, currentUserId);
     }
 
     public async Task<GiftDto> CreateAsync(CreateGiftDto dto)
     {
-        var gift = mapper.Map<Gift>(dto);
-        gift.Id = Guid.NewGuid();
-        gift.CreatedAt = DateTime.UtcNow;
+        var gift = new Gift
+        {
+            Id = Guid.NewGuid(),
+            Name = dto.Name,
+            Description = dto.Description,
+            Price = dto.Price,
+            ImageUrl = dto.ImageUrl,
+            PurchaseLink = dto.PurchaseLink,
+            MaxReservations = dto.MaxReservations,
+            DisplayOrder = dto.DisplayOrder,
+            IsVisible = dto.IsVisible,
+            CreatedAt = DateTime.UtcNow,
+        };
         
         await giftRepository.AddAsync(gift);
         await giftRepository.SaveChangesAsync();
         
-        return mapper.Map<GiftDto>(gift);
+        return new GiftDto(gift);
     }
 
     public async Task<GiftDto> UpdateAsync(Guid id, UpdateGiftDto dto)
@@ -66,13 +57,20 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
             throw new KeyNotFoundException($"Gift with ID {id} not found");
         }
         
-        mapper.Map(dto, gift);
+        gift.Name = dto.Name;
+        gift.Description = dto.Description;
+        gift.Price = dto.Price;
+        gift.ImageUrl = dto.ImageUrl;
+        gift.PurchaseLink = dto.PurchaseLink;
+        gift.MaxReservations = dto.MaxReservations;
+        gift.DisplayOrder = dto.DisplayOrder;
+        gift.IsVisible = dto.IsVisible;
         gift.UpdatedAt = DateTime.UtcNow;
         
         giftRepository.Update(gift);
         await giftRepository.SaveChangesAsync();
         
-        return mapper.Map<GiftDto>(gift);
+        return new GiftDto(gift);
     }
 
     public async Task DeleteAsync(Guid id)
@@ -192,14 +190,7 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
     public async Task<IEnumerable<GiftDto>> GetMyReservedGiftsAsync(Guid userId)
     {
         var gifts = await giftRepository.GetReservedByUserAsync(userId);
-        var dtos = mapper.Map<IEnumerable<GiftDto>>(gifts).ToList();
-
-        foreach (var dto in dtos)
-        {
-            dto.IsReservedByMe = true;
-        }
-
-        return dtos;
+        return gifts.Select(g => new GiftDto(g, userId));
     }
 
     public async Task<ImportGiftsResultDto> ImportGiftsAsync(IEnumerable<CreateGiftDto> dtos)

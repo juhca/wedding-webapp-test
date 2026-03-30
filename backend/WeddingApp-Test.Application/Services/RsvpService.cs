@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using WeddingApp_Test.Application.DTO.Rsvp;
+﻿using WeddingApp_Test.Application.DTO.Rsvp;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Domain.Enums;
@@ -10,14 +9,12 @@ public class RsvpService : IRsvpService
 {
     private readonly IRsvpRepository _rsvpRepository;
     private readonly IUserRepository _userRepository;
-    private readonly IMapper _mapper;
     private readonly IEmailDispatchService _emailDispatch;
     
-    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository, IMapper mapper, IEmailDispatchService emailDispatch)
+    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository, IEmailDispatchService emailDispatch)
     {
         _rsvpRepository = rsvpRepository;
         _userRepository = userRepository;
-        _mapper = mapper;
         _emailDispatch = emailDispatch;
     }
     
@@ -25,7 +22,7 @@ public class RsvpService : IRsvpService
     {
         var rsvp = await _rsvpRepository.GetByUserIdAsync(userId);
         
-        return rsvp != null ? _mapper.Map<RsvpDto>(rsvp) : null;
+        return rsvp != null ? new RsvpDto(rsvp) : null;
     }
 
     public async Task<RsvpDto> CreateOrUpdateRsvpAsync(Guid userId, CreateRsvpDto dto)
@@ -111,8 +108,7 @@ public class RsvpService : IRsvpService
         else
             _ = _emailDispatch.DispatchEventAsync("RsvpUpdated", user, new Dictionary<string, object?> { ["rsvp"] = new { isAttending = rsvp.IsAttending, companionCount = rsvp.Companions.Count } });
 
-        var result = _mapper.Map<RsvpDto>(rsvp);
-        result.MaxCompanionsAllowed = maxCompanions;
+        var result = new RsvpDto(rsvp, maxCompanions);
         
         return result;
     }
@@ -144,8 +140,8 @@ public class RsvpService : IRsvpService
             TotalPeople = totalPeople,
             TotalCompanions = totalCompanions,
             PendingResponses = pendingUsers.Count,
-            AttendingGuests = _mapper.Map<List<RsvpWithUserDto>>(attending),
-            NotAttendingGuests = _mapper.Map<List<RsvpWithUserDto>>(notAttending),
+            AttendingGuests = attending.Select(r => new RsvpWithUserDto(r)).ToList(),
+            NotAttendingGuests = notAttending.Select(r => new RsvpWithUserDto(r)).ToList(),
             PendingGuests = pendingUsers.Select(u => new RsvpWithUserDto
             {
                 UserId = u.Id,
@@ -163,7 +159,7 @@ public class RsvpService : IRsvpService
     {
         var rsvps = await _rsvpRepository.GetAllWithUsersAsync();
         
-        return _mapper.Map<IEnumerable<RsvpWithUserDto>>(rsvps);
+        return rsvps.Select(r => new RsvpWithUserDto(r));
     }
 
     public async Task<IEnumerable<CateringExportDto>> ExportForCateringAsync()

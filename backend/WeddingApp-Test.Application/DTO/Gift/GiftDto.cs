@@ -1,4 +1,7 @@
-﻿namespace WeddingApp_Test.Application.DTO.Gift;
+﻿using WeddingApp_Test.Domain.Entities;
+using GiftEntity = WeddingApp_Test.Domain.Entities.Gift;
+
+namespace WeddingApp_Test.Application.DTO.Gift;
 
 public class GiftDto
 {
@@ -35,5 +38,25 @@ public class GiftDto
             
             return $"{ReservationCount}/{MaxReservations} reserved";
         }
+    }
+
+    public GiftDto() { }
+
+    public GiftDto(GiftEntity gift, Guid? currentUserId = null)
+    {
+        Id = gift.Id;
+        Name = gift.Name;
+        Description = gift.Description;
+        Price = gift.Price;
+        ImageUrl = gift.ImageUrl;
+        PurchaseLink = gift.PurchaseLink;
+        MaxReservations = gift.MaxReservations;
+        ReservationCount = gift.ReservationCount;
+        RemainingReservations = gift.RemainingReservations;
+        IsFullyReserved = gift.IsFullyReserved;
+        DisplayOrder = gift.DisplayOrder;
+        IsVisible = gift.IsVisible;
+        IsReservedByMe = currentUserId.HasValue && gift.Reservations.Any(r => r.ReservedByUserId == currentUserId.Value);
+        Reservations = (gift.Reservations ?? []).Select(r => new GiftReservationDto(r)).ToList();
     }
 }

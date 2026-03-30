@@ -1,4 +1,7 @@
-﻿namespace WeddingApp_Test.Application.DTO.Rsvp;
+﻿using WeddingApp_Test.Domain.Entities;
+using RsvpEntity = WeddingApp_Test.Domain.Entities.Rsvp;
+
+namespace WeddingApp_Test.Application.DTO.Rsvp;
 
 public class RsvpDto
 {
@@ -22,4 +25,21 @@ public class RsvpDto
     
     // User's max allowed companions
     public int MaxCompanionsAllowed { get; set; }
+
+    public RsvpDto() { }
+
+    public RsvpDto(RsvpEntity rsvp, int maxCompanionsAllowed = 0)
+    {
+        Id = rsvp.Id;
+        UserId = rsvp.UserId;
+        IsAttending = rsvp.IsAttending;
+        RespondedAt = rsvp.RespondedAt;
+        Companions = rsvp.Companions.Select(c => new GuestCompanionDto(c)).ToList();
+        DietaryRestrictions = rsvp.DietaryRestrictions;
+        Notes = rsvp.Notes;
+        WantsReminder = rsvp.WantsReminder;
+        CreatedAt = rsvp.CreatedAt;
+        UpdatedAt = rsvp.UpdatedAt;
+        MaxCompanionsAllowed = maxCompanionsAllowed;
+    }
 }
