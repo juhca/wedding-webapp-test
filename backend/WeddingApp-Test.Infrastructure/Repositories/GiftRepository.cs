@@ -67,6 +67,7 @@ public class GiftRepository(AppDbContext context) : IGiftRepository
     {
         return await context.Gifts
             .Include(g => g.Reservations)
+                .ThenInclude(r => r.ReservedBy)
             .Where(g => g.Reservations.Any(r => r.ReservedByUserId == userId))
             .ToListAsync();
     }

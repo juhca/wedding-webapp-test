@@ -5,6 +5,7 @@ using WeddingApp_Test.API.Tests.Helpers;
 using WeddingApp_Test.Application.DTO.Auth;
 using WeddingApp_Test.Application.DTO.Login;
 using WeddingApp_Test.Application.DTO.WeddingInfo;
+using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Domain.Enums;
 using WeddingApp_Test.Infrastructure.Persistence;
 
@@ -25,6 +26,9 @@ public class WeddingInfoControllerTests : IClassFixture<WeddingAppWebApplication
     [Fact]
     public async Task WeddingInfo_ReturnBasicWeddingInfo()
     {
+        // Arrange
+        await SeedWeddingInfoAsync();
+        
         // Act
         var weddingInfoResponse = await _client.GetAsync("/api/WeddingInfo");
         weddingInfoResponse.EnsureSuccessStatusCode();
@@ -42,6 +46,7 @@ public class WeddingInfoControllerTests : IClassFixture<WeddingAppWebApplication
     public async Task WeddingInfo_ReturnLimitedExperienceWeddingInfo()
     {
         // Arrange
+        await SeedWeddingInfoAsync();
         var accessCode = "LimitedExperienceAccessCode";
 
         // Seed the database with a test admin user
@@ -79,6 +84,7 @@ public class WeddingInfoControllerTests : IClassFixture<WeddingAppWebApplication
     public async Task WeddingInfo_ReturnFullExperienceWeddingInfo()
     {
         // Arrange
+        await SeedWeddingInfoAsync();
         var accessCode = "FullExperienceAccessCode";
 
         // Seed the database with a test admin user
@@ -115,6 +121,7 @@ public class WeddingInfoControllerTests : IClassFixture<WeddingAppWebApplication
     public async Task WeddingInfo_ReturnAdminWeddingInfo()
     {
         // Arrange
+        await SeedWeddingInfoAsync();
         var email = "admin@wedding.com";
         var password = "SecurePassword123";
 
@@ -149,6 +156,39 @@ public class WeddingInfoControllerTests : IClassFixture<WeddingAppWebApplication
     }
     
     #region HelperMethods
+    /// <summary>
+    /// Seeds a WeddingInfo record if one doesn't already exist.
+    /// </summary>
+    private async Task SeedWeddingInfoAsync()
+    {
+        await SeedDatabase(db =>
+        {
+            if (db.WeddingInfo.Any()) return;
+
+            db.WeddingInfo.Add(new WeddingInfo
+            {
+                Id = Guid.NewGuid(),
+                BrideName = "Ana",
+                BrideSurname = "Kovač",
+                GroomName = "Marko",
+                GroomSurname = "Novak",
+                ApproximateDate = "Summer 2027",
+                WeddingName = "Ana & Marko's Wedding",
+                WeddingDescription = "A beautiful wedding",
+                WeddingDate = new DateTime(2027, 7, 15, 14, 0, 0, DateTimeKind.Utc),
+                CivilLocationName = "Civil Registry",
+                CivilLocationAddress = "Civil St 1",
+                ChurchLocationName = "St. Mary's Church",
+                ChurchLocationAddress = "Church Ave 2",
+                PartyLocationName = "Grand Hotel",
+                PartyLocationAddress = "Party Blvd 3",
+                HouseLocationName = "Family House",
+                HouseLocationAddress = "Home St 4",
+                CreatedAt = DateTime.UtcNow
+            });
+        });
+    }
+
     /// <summary>
     /// Helper method to seed the database with test data.
     /// Creates a new scope and disposes it properly after seeding.
