@@ -1,5 +1,4 @@
 using WeddingApp_Test.Application.Interfaces;
-using WeddingApp_Test.Domain.Entities;
 
 namespace WeddingApp_Test.API.Tests.Fakes;
 
@@ -8,9 +7,6 @@ namespace WeddingApp_Test.API.Tests.Fakes;
 /// </summary>
 public class FakeEmailService : IEmailService
 {
-    public Task SendReminderEmailAsync(string recipientEmail, Reminder reminder, CancellationToken ct = default)
-        => Task.CompletedTask;
-
     public Task SendAsync(string recipientEmail, string subject, string body, CancellationToken ct = default)
         => Task.CompletedTask;
 }

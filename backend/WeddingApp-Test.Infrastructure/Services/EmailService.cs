@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using WeddingApp_Test.Application.Email;
 using WeddingApp_Test.Application.Interfaces;
-using WeddingApp_Test.Domain.Entities;
 
 namespace WeddingApp_Test.Infrastructure.Services;
 
@@ -9,68 +8,14 @@ public class EmailService(IEnumerable<IEmailProvider> providers, ILogger<EmailSe
 {
     private const int MaxRetriesPerProvider = 3;
 
-    public async Task SendReminderEmailAsync(string recipientEmail, Reminder reminder, CancellationToken ct = default)
-    {
-        var message = new ReminderEmailMessage(reminder);
-        var providerList = providers.ToList();
-        var hadTransientFailure = false;
-
-        foreach (var provider in providerList)
-        {
-            var shouldSwitchProvider = false;
-
-            for (int attempt = 1; attempt <= MaxRetriesPerProvider; attempt++)
-            {
-                try
-                {
-                    await provider.SendAsync(recipientEmail, message, ct);
-
-                    logger.LogInformation("Reminder {ReminderId} sent to {Recipient} via {Provider} on attempt {Attempt}.", reminder.Id, recipientEmail, provider.Name, attempt);
-
-                    return;
-                }
-                catch (EmailProviderException ex) when (ex.IsPermanent)
-                {
-                    logger.LogError(ex, "{Provider} reported a permanent failure for reminder {ReminderId} — skipping provider.", provider.Name, reminder.Id);
-
-                    shouldSwitchProvider = true;
-                    break;
-                }
-                catch (EmailProviderException ex)
-                {
-                    logger.LogWarning(ex, "{Provider} transient failure for reminder {ReminderId} (attempt {Attempt}/{Max}).", provider.Name, reminder.Id, attempt, MaxRetriesPerProvider);
-
-                    if (attempt < MaxRetriesPerProvider)
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(attempt * 2), ct); // 2s then 4s
-                    }
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    logger.LogWarning(ex, "{Provider} unexpected failure for reminder {ReminderId} (attempt {Attempt}/{Max}).", provider.Name, reminder.Id, attempt, MaxRetriesPerProvider);
-
-                    if (attempt < MaxRetriesPerProvider)
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(attempt * 2), ct);
-                    }
-                }
-            }
-
-            if (!shouldSwitchProvider)
-            {
-                // retries exhausted transiently — not a permanent/recipient-specific issue
-                hadTransientFailure = true;
-                logger.LogError("All {Max} retries exhausted for {Provider} on reminder {ReminderId} — switching to next provider.", MaxRetriesPerProvider, provider.Name, reminder.Id);
-            }
-        }
-
-        logger.LogCritical("All {Count} email provider(s) failed for reminder {ReminderId}. Email was not delivered.", providerList.Count, reminder.Id);
-        throw new EmailDeliveryException(reminder.Id, isTransient: hadTransientFailure);
-    }
-
     public async Task SendAsync(string recipientEmail, string subject, string body, CancellationToken ct = default)
     {
         var message = new PlainEmail(subject, body);
+        await SendWithRetryAsync(recipientEmail, message, ct);
+    }
+
+    private async Task SendWithRetryAsync(string recipientEmail, EmailMessage message, CancellationToken ct)
+    {
         var providerList = providers.ToList();
         var hadTransientFailure = false;
 
@@ -120,12 +65,5 @@ public class EmailService(IEnumerable<IEmailProvider> providers, ILogger<EmailSe
 
         logger.LogCritical("All {Count} email provider(s) failed. Email to {Recipient} was not delivered.", providerList.Count, recipientEmail);
         throw new EmailDeliveryException(Guid.Empty, isTransient: hadTransientFailure);
-    }
-
-    // TODO move with other inheritors
-    private sealed class PlainEmail(string subject, string body) : EmailMessage
-    {
-        public override string Subject => subject;
-        public override string Body => body;
     }
 }

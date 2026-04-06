@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.BearerToken;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WeddingApp_Test.Application.DTO.User;
@@ -42,8 +43,6 @@ public class UsersController(IUserService userService) : ControllerBase
 	{
 		try
 		{
-			// TODO(TOMAS): send the user a confirmation email of changed email
-			// TODO(TOMAS): email address must be confirmed by clicking the link on the email?
 			var updatedUser = await userService.UpdateEmailAsync(id, request);
 			if (updatedUser is null)
 			{
@@ -56,5 +55,31 @@ public class UsersController(IUserService userService) : ControllerBase
 		{
 			return Conflict(ex.Message);
 		}
+	}
+
+	[HttpPatch("me/email")]
+	[Authorize]
+	[ProducesResponseType(typeof(UserDto), 200)]
+	[ProducesResponseType(404)]
+	[ProducesResponseType(409)]
+	public async Task<IActionResult> UpdateMyEmail([FromBody] UpdateUserEmailRequest request)
+	{
+		var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+		try
+		{
+			// TODO(TOMAS): send the user a confirmation email of changed email
+			var updatedUser = await userService.UpdateEmailAsync(userId, request);
+			if (updatedUser is null)
+			{
+				return NotFound($"User with ID {userId} not found.");
+			}
+			
+			return Ok(updatedUser);
+		}
+		catch (InvalidOperationException ex)
+		{
+			return Conflict(ex.Message);
+		}
+		 
 	}
 }

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using WeddingApp_Test.Application.Email;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Infrastructure.Persistence;
@@ -53,6 +54,8 @@ public class EmailDispatchService(AppDbContext db, IEmailService emailService, I
                 SentAt = DateTime.UtcNow
             };
 
+            var shouldAbort = false;
+
             try
             {
                 var subject = await liquidRenderer.RenderAsync(template.Subject, renderModel);
@@ -63,6 +66,15 @@ public class EmailDispatchService(AppDbContext db, IEmailService emailService, I
                 log.Succeeded = true;
                 logger.LogInformation("Dispatched template {TemplateId} ({TemplateName}) to {Email} for event {Event}.",
                     template.Id, template.Name, triggeredBy.Email, eventName);
+            }
+            catch (EmailDeliveryException ex) when (ex.IsTransient)
+            {
+                log.Succeeded = false;
+                log.Error = ex.Message;
+                logger.LogError(ex, "Transient delivery failure dispatching template {TemplateId} to {Email} for event {Event} — aborting remaining templates.",
+                    template.Id, triggeredBy.Email, eventName);
+
+                shouldAbort = true;
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
@@ -76,6 +88,9 @@ public class EmailDispatchService(AppDbContext db, IEmailService emailService, I
                 db.EmailSendLogs.Add(log);
                 await db.SaveChangesAsync(ct);
             }
+
+            if (shouldAbort)
+                return;
         }
     }
 }

@@ -41,7 +41,8 @@ public class ReminderProcessor(IReminderRepository reminderRepository, IRsvpRepo
 
             try
             {
-                await emailService.SendReminderEmailAsync(recipientEmail, reminder, cancellationToken);
+                var message = new ReminderEmailMessage(reminder);
+                await emailService.SendAsync(recipientEmail, message.Subject, message.Body, cancellationToken);
                 reminder.SentAt = now;
             }
             catch (EmailDeliveryException ex) when (ex.IsTransient)

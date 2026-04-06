@@ -256,8 +256,6 @@ public class EmailDispatchServiceTests(WeddingAppWebApplicationFactory factory) 
     {
         public List<(string To, string Subject, string Body)> SentEmails { get; } = [];
 
-        public Task SendReminderEmailAsync(string recipientEmail, Reminder reminder, CancellationToken ct = default) => Task.CompletedTask;
-
         public Task SendAsync(string recipientEmail, string subject, string body, CancellationToken ct = default)
         {
             SentEmails.Add((recipientEmail, subject, body));
@@ -268,8 +266,6 @@ public class EmailDispatchServiceTests(WeddingAppWebApplicationFactory factory) 
 
     private sealed class FailingEmailService : IEmailService
     {
-        public Task SendReminderEmailAsync(string recipientEmail, Reminder reminder, CancellationToken ct = default) => Task.CompletedTask;
-
         public Task SendAsync(string recipientEmail, string subject, string body, CancellationToken ct = default) => throw new EmailDeliveryException(Guid.Empty, isTransient: true);
     }
     #endregion
