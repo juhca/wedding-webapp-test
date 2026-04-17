@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using WeddingApp_Test.Application.DTO.Gift;
 using WeddingApp_Test.Application.Interfaces;
@@ -7,12 +6,12 @@ using WeddingApp_Test.Domain.Entities;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IMapper mapper) : IGiftService
+public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository) : IGiftService
 {
     public async Task<IEnumerable<GiftDto>> GetAllVisibleAsync(Guid? currentUserId = null)
     {
         var gifts = await giftRepository.GetVisibleAsync();
-        var dtos = mapper.Map<IEnumerable<GiftDto>>(gifts).ToList();
+        var dtos = gifts.Select(GiftDto.FromEntity).ToList();
 
         if (currentUserId.HasValue)
         {
@@ -35,7 +34,7 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
             throw new KeyNotFoundException($"Gift with ID {id} not found");
         }
         
-        var dto = mapper.Map<GiftDto>(gift);
+        var dto = GiftDto.FromEntity(gift);
         
         if (currentUserId.HasValue)
         {
@@ -47,14 +46,14 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
 
     public async Task<GiftDto> CreateAsync(CreateGiftDto dto)
     {
-        var gift = mapper.Map<Gift>(dto);
+        var gift = dto.ToEntity();
         gift.Id = Guid.NewGuid();
         gift.CreatedAt = DateTime.UtcNow;
-        
+
         await giftRepository.AddAsync(gift);
         await giftRepository.SaveChangesAsync();
-        
-        return mapper.Map<GiftDto>(gift);
+
+        return GiftDto.FromEntity(gift);
     }
 
     public async Task<GiftDto> UpdateAsync(Guid id, UpdateGiftDto dto)
@@ -66,13 +65,13 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
             throw new KeyNotFoundException($"Gift with ID {id} not found");
         }
         
-        mapper.Map(dto, gift);
+        dto.ApplyTo(gift);
         gift.UpdatedAt = DateTime.UtcNow;
-        
+
         giftRepository.Update(gift);
         await giftRepository.SaveChangesAsync();
-        
-        return mapper.Map<GiftDto>(gift);
+
+        return GiftDto.FromEntity(gift);
     }
 
     public async Task DeleteAsync(Guid id)
@@ -176,7 +175,7 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
     public async Task<IEnumerable<GiftDto>> GetMyReservedGiftsAsync(Guid userId)
     {
         var gifts = await giftRepository.GetReservedByUserAsync(userId);
-        var dtos = mapper.Map<IEnumerable<GiftDto>>(gifts).ToList();
+        var dtos = gifts.Select(GiftDto.FromEntity).ToList();
 
         foreach (var dto in dtos)
         {

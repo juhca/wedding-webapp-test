@@ -1,4 +1,6 @@
-﻿namespace WeddingApp_Test.Application.DTO.Rsvp;
+﻿using RsvpEntity = WeddingApp_Test.Domain.Entities.Rsvp;
+
+namespace WeddingApp_Test.Application.DTO.Rsvp;
 
 public class RsvpDto
 {
@@ -21,4 +23,17 @@ public class RsvpDto
     
     // User's max allowed companions
     public int MaxCompanionsAllowed { get; set; }
+
+    public static RsvpDto FromEntity(RsvpEntity r) => new()
+    {
+        Id = r.Id,
+        UserId = r.UserId,
+        IsAttending = r.IsAttending,
+        RespondedAt = r.RespondedAt,
+        DietaryRestrictions = r.DietaryRestrictions,
+        Notes = r.Notes,
+        CreatedAt = r.CreatedAt,
+        UpdatedAt = r.UpdatedAt,
+        Companions = r.Companions.Select(GuestCompanionDto.FromEntity).ToList()
+    };
 }

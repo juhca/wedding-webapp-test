@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using WeddingApp_Test.Application.DTO.Rsvp;
+﻿using WeddingApp_Test.Application.DTO.Rsvp;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Domain.Enums;
@@ -10,20 +9,18 @@ public class RsvpService : IRsvpService
 {
     private readonly IRsvpRepository _rsvpRepository;
     private readonly IUserRepository _userRepository;
-    private readonly IMapper _mapper;
-    
-    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository, IMapper mapper)
+
+    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository)
     {
         _rsvpRepository = rsvpRepository;
         _userRepository = userRepository;
-        _mapper = mapper;
     }
     
     public async Task<RsvpDto?> GetUserRsvpAsync(Guid userId)
     {
         var rsvp = await _rsvpRepository.GetByUserIdAsync(userId);
         
-        return rsvp != null ? _mapper.Map<RsvpDto>(rsvp) : null;
+        return rsvp != null ? RsvpDto.FromEntity(rsvp) : null;
     }
 
     public async Task<RsvpDto> CreateOrUpdateRsvpAsync(Guid userId, CreateRsvpDto dto)
@@ -99,7 +96,7 @@ public class RsvpService : IRsvpService
         }
         await _rsvpRepository.SaveChangesAsync(); 
         
-        var result = _mapper.Map<RsvpDto>(rsvp);
+        var result = RsvpDto.FromEntity(rsvp);
         result.MaxCompanionsAllowed = maxCompanions;
         
         return result;
@@ -132,8 +129,8 @@ public class RsvpService : IRsvpService
             TotalPeople = totalPeople,
             TotalCompanions = totalCompanions,
             PendingResponses = pendingUsers.Count,
-            AttendingGuests = _mapper.Map<List<RsvpWithUserDto>>(attending),
-            NotAttendingGuests = _mapper.Map<List<RsvpWithUserDto>>(notAttending),
+            AttendingGuests = attending.Select(RsvpWithUserDto.FromEntity).ToList(),
+            NotAttendingGuests = notAttending.Select(RsvpWithUserDto.FromEntity).ToList(),
             PendingGuests = pendingUsers.Select(u => new RsvpWithUserDto
             {
                 UserId = u.Id,
@@ -151,7 +148,7 @@ public class RsvpService : IRsvpService
     {
         var rsvps = await _rsvpRepository.GetAllWithUsersAsync();
         
-        return _mapper.Map<IEnumerable<RsvpWithUserDto>>(rsvps);
+        return rsvps.Select(RsvpWithUserDto.FromEntity);
     }
 
     public async Task<IEnumerable<CateringExportDto>> ExportForCateringAsync()

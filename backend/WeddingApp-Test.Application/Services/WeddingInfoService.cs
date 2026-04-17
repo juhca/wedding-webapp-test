@@ -1,12 +1,11 @@
-﻿using AutoMapper;
-using WeddingApp_Test.Application.DTO.WeddingInfo;
+﻿using WeddingApp_Test.Application.DTO.WeddingInfo;
 using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Domain.Enums;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository, IMapper mapper) : IWeddingInfoService
+public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository) : IWeddingInfoService
 {
     public async Task<WeddingInfoDto?> GetWeddingInfoAsync(UserRole? userRole)
     {
@@ -97,7 +96,7 @@ public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository, IM
         {
             throw new InvalidOperationException("Wedding info not initialized. Call InitializeWeddingInfoAsync first.");
         }
-        mapper.Map(dto, weddingInfo);
+        dto.ApplyTo(weddingInfo);
         weddingInfo.UpdatedByUserId = updatedByUserId;
         await weddingInfoRepository.UpdateAsync(weddingInfo);
         
@@ -112,7 +111,7 @@ public class WeddingInfoService(IWeddingInfoRepository weddingInfoRepository, IM
             throw new InvalidOperationException("Wedding info already exists. Use UpdateWeddingInfoAsync instead.");
         }
         
-        var weddingInfo = mapper.Map<WeddingInfo>(dto);
+        var weddingInfo = dto.ToEntity();
         weddingInfo.Id = Guid.NewGuid();
         weddingInfo.UpdatedByUserId = createdByUserId;
         

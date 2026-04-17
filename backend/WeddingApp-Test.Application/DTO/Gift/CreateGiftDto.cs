@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using GiftEntity = WeddingApp_Test.Domain.Entities.Gift;
 
 namespace WeddingApp_Test.Application.DTO.Gift;
 
@@ -30,4 +31,16 @@ public class CreateGiftDto
     
     public int DisplayOrder { get; set; } = 0;
     public bool IsVisible { get; set; } = true;
+
+    public GiftEntity ToEntity() => new()
+    {
+        Name = Name,
+        Description = Description,
+        Price = Price,
+        ImageUrl = ImageUrl,
+        PurchaseLink = PurchaseLink,
+        MaxReservations = MaxReservations,
+        DisplayOrder = DisplayOrder,
+        IsVisible = IsVisible
+    };
 }

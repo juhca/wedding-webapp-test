@@ -1,4 +1,7 @@
-﻿namespace WeddingApp_Test.Application.DTO.Gift;
+﻿using GiftEntity = WeddingApp_Test.Domain.Entities.Gift;
+using GiftReservationEntity = WeddingApp_Test.Domain.Entities.GiftReservation;
+
+namespace WeddingApp_Test.Application.DTO.Gift;
 
 public class GiftDto
 {
@@ -22,6 +25,23 @@ public class GiftDto
     public bool IsReservedByMe { get; set; }
     public List<GiftReservationDto> Reservations { get; set; } = [];
     
+    public static GiftDto FromEntity(GiftEntity g) => new()
+    {
+        Id = g.Id,
+        Name = g.Name,
+        Description = g.Description,
+        Price = g.Price,
+        ImageUrl = g.ImageUrl,
+        PurchaseLink = g.PurchaseLink,
+        MaxReservations = g.MaxReservations,
+        ReservationCount = g.ReservationCount,
+        RemainingReservations = g.RemainingReservations,
+        IsFullyReserved = g.IsFullyReserved,
+        DisplayOrder = g.DisplayOrder,
+        IsVisible = g.IsVisible,
+        Reservations = g.Reservations.Select(r => GiftReservationDto.FromEntity(r)).ToList()
+    };
+
     // Display helper
     public string ReservationStatus
     {

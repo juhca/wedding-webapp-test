@@ -3,16 +3,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using WeddingApp_Test.API.BackgroundServices;
 using WeddingApp_Test.API.Filters;
 using WeddingApp_Test.Application.Configuration;
 using WeddingApp_Test.Application.Interfaces;
-using WeddingApp_Test.Application.Mappings;
 using WeddingApp_Test.Application.Services;
 using WeddingApp_Test.Infrastructure.Data;
 using WeddingApp_Test.Infrastructure.Persistence;
 using WeddingApp_Test.Infrastructure.Repositories;
-using WeddingApp_Test.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,8 +53,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IWeddingInfoRepository, WeddingInfoRepository>();
 builder.Services.AddScoped<IRsvpRepository, RsvpRepository>();
 builder.Services.AddScoped<IGiftRepository, GiftRepository>();
-builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
-
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -67,25 +62,6 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IWeddingInfoService, WeddingInfoService>();
 builder.Services.AddScoped<IRsvpService, RsvpService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
-builder.Services.AddScoped<IReminderService, ReminderService>();
-// Email — bind provider options
-builder.Services.Configure<ResendOptions>(builder.Configuration.GetSection(ResendOptions.SectionName));
-builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
-// Register providers as IEmailProvider (order = priority: first = primary)
-builder.Services.AddHttpClient<ResendEmailProvider>();
-builder.Services.AddTransient<IEmailProvider, ResendEmailProvider>();
-builder.Services.AddTransient<IEmailProvider, SmtpEmailProvider>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IReminderProcessor, ReminderProcessor>();
-
-// Background Services
-builder.Services.AddHostedService<ReminderBackgroundService>();
-
-// AutoMapper
-builder.Services.AddAutoMapper(
-    cfg => { },  // prazna konfiguracija
-    typeof(AutoMapperProfile).Assembly
-);
 
 // JWT Authentication
 builder.Services.AddAuthentication(options =>

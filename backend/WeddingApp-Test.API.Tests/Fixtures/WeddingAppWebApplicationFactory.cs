@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using WeddingApp_Test.API.Tests.Fakes;
-using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Infrastructure.Persistence;
 
@@ -44,14 +42,6 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
             {
                 options.UseInMemoryDatabase(_dbName);
             });
-
-            // Replace real email service with no-op fake — prevents real emails during tests
-            var emailDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IEmailService));
-            if (emailDescriptor != null)
-            {
-				services.Remove(emailDescriptor);
-			}
-            services.AddScoped<IEmailService, FakeEmailService>();
 
             // Build the service provider
             var serviceProvider = services.BuildServiceProvider();
@@ -116,8 +106,7 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
         db.WeddingInfo.RemoveRange(db.WeddingInfo);
         db.Gifts.RemoveRange(db.Gifts);
         db.GiftReservations.RemoveRange(db.GiftReservations);
-        db.Reminders.RemoveRange(db.Reminders);
-        
+
         await db.SaveChangesAsync();
     }
 }

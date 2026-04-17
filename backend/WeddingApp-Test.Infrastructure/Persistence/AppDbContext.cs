@@ -12,8 +12,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 	public DbSet<GuestCompanion> GuestCompanions => Set<GuestCompanion>();
 	public DbSet<Gift> Gifts => Set<Gift>();
 	public DbSet<GiftReservation> GiftReservations => Set<GiftReservation>();
-	public DbSet<Reminder> Reminders => Set<Reminder>();
-
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
@@ -130,19 +128,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 			entity.Ignore(g => g.RemainingReservations);
 		});
         
-		// REMINDER CONFIGURATION
-		modelBuilder.Entity<Reminder>(entity =>
-		{
-			entity.HasKey(r => r.Id);
-
-			entity.Property(r => r.Type).HasConversion<string>();
-			entity.Property(r => r.Unit).HasConversion<string>();
-
-			// No DB-level FK — TargetId semantics depend on Type
-			entity.HasIndex(r => new { r.Type, r.TargetId });
-			entity.HasIndex(r => r.ScheduledFor);
-		});
-
 		// GIFT RESERVATION CONFIGURATION
 		modelBuilder.Entity<GiftReservation>(entity =>
 		{
