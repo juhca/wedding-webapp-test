@@ -69,7 +69,7 @@ public class EmailOutboxRepositoryTests(WeddingAppWebApplicationFactory factory)
         var ready = new EmailOutbox { Id = Guid.NewGuid(), ToEmail = "a@a.com", ToName = "A", Subject = "S", HtmlBody = "B", EmailType = "x", CreatedAt = now, Status = EmailStatus.Pending };
 
         // Should NOT be returned — Pending but NextRetryAt is 24 h in the future
-        var future = new EmailOutbox { Id = Guid.NewGuid(), ToEmail = "b@b.com", ToName = "B", Subject = "S", HtmlBody = "B", EmailType = "x", CreatedAt = now, Status = EmailStatus.Pending, NexRetryAt = now.AddHours(24) };
+        var future = new EmailOutbox { Id = Guid.NewGuid(), ToEmail = "b@b.com", ToName = "B", Subject = "S", HtmlBody = "B", EmailType = "x", CreatedAt = now, Status = EmailStatus.Pending, NextRetryAt = now.AddHours(24) };
 
         // Should NOT be returned — already marked Sent, no longer retryable
         var sent = new EmailOutbox { Id = Guid.NewGuid(), ToEmail = "c@c.com", ToName = "C", Subject = "S", HtmlBody = "B", EmailType = "x", CreatedAt = now, Status = EmailStatus.Sent };

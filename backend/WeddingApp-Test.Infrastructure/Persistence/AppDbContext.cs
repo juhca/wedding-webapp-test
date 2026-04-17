@@ -163,7 +163,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 		{
 			entity.HasKey(e => e.Id);
 			entity.Property(e => e.Status).HasConversion<string>();
-			entity.HasIndex(e => new { e.Status, e.NexRetryAt });
+			entity.HasIndex(e => new { e.Status, NextRetryAt = e.NextRetryAt });
 		});
 		
 		// EMAIL TEMPLATE

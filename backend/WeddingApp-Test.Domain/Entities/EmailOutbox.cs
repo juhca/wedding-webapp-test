@@ -19,7 +19,7 @@ public class EmailOutbox
     
     public DateTime CreatedAt { get; set; }
     public DateTime SentAt { get; set; }
-    public DateTime? NexRetryAt { get; set; }
+    public DateTime? NextRetryAt { get; set; }
     
     /// <summary>Matches the event trigger name, e.g. "rsvp.submitted".</summary>
     public string EmailType { get; set; } = string.Empty;

@@ -22,7 +22,7 @@ public class EmailOutboxRepository(AppDbContext dbContext) : IEmailOutboxReposit
     {
         return await dbContext.EmailOutbox
             .Where(e => e.Status == EmailStatus.Pending 
-                        && (e.NexRetryAt == null || e.NexRetryAt <= asOf))
+                        && (e.NextRetryAt == null || e.NextRetryAt <= asOf))
             .ToListAsync();
     }
 
