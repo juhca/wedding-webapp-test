@@ -106,6 +106,9 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
         db.WeddingInfo.RemoveRange(db.WeddingInfo);
         db.Gifts.RemoveRange(db.Gifts);
         db.GiftReservations.RemoveRange(db.GiftReservations);
+        db.EmailOutbox.RemoveRange(db.EmailOutbox);
+        db.EmailTemplates.RemoveRange(db.EmailTemplates);
+        db.EmailSendLogs.RemoveRange(db.EmailSendLogs);
 
         await db.SaveChangesAsync();
     }

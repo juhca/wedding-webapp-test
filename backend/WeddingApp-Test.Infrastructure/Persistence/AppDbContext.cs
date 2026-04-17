@@ -12,6 +12,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 	public DbSet<GuestCompanion> GuestCompanions => Set<GuestCompanion>();
 	public DbSet<Gift> Gifts => Set<Gift>();
 	public DbSet<GiftReservation> GiftReservations => Set<GiftReservation>();
+	public DbSet<EmailOutbox> EmailOutbox => Set<EmailOutbox>();
+	public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
+	public DbSet<EmailSendLog> EmailSendLogs => Set<EmailSendLog>();
+	
+	
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
@@ -151,6 +156,34 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             
 			// UNIQUE CONSTRAINT - user can reserve same gift only once
 			entity.HasIndex(gr => new { gr.GiftId, gr.ReservedByUserId }).IsUnique();
+		});
+		
+		// EMAIL OUTBOX
+		modelBuilder.Entity<EmailOutbox>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.Property(e => e.Status).HasConversion<string>();
+			entity.HasIndex(e => new { e.Status, e.NexRetryAt });
+		});
+		
+		// EMAIL TEMPLATE
+		modelBuilder.Entity<EmailTemplate>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.HasIndex(e => e.TriggerName);
+			entity.HasIndex(e => e.IsActive);
+		});
+		
+		// EMAIL SEND LOG
+		modelBuilder.Entity<EmailSendLog>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.HasOne(e => e.Template)
+				.WithMany(t => t.SendLogs)
+				.HasForeignKey(e => e.TemplateId)
+				.OnDelete(DeleteBehavior.Cascade);
+			entity.HasIndex(e => new { e.TemplateId, e.UserId });
+			entity.HasIndex(e => e.DispatchedAt);
 		});
 	}
 }

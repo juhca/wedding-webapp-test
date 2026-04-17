@@ -6,8 +6,10 @@ using Microsoft.OpenApi.Models;
 using WeddingApp_Test.API.Filters;
 using WeddingApp_Test.Application.Configuration;
 using WeddingApp_Test.Application.Interfaces;
+using WeddingApp_Test.Application.Interfaces.Email;
 using WeddingApp_Test.Application.Services;
 using WeddingApp_Test.Infrastructure.Data;
+using WeddingApp_Test.Infrastructure.Email;
 using WeddingApp_Test.Infrastructure.Persistence;
 using WeddingApp_Test.Infrastructure.Repositories;
 
@@ -53,6 +55,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IWeddingInfoRepository, WeddingInfoRepository>();
 builder.Services.AddScoped<IRsvpRepository, RsvpRepository>();
 builder.Services.AddScoped<IGiftRepository, GiftRepository>();
+builder.Services.AddScoped<IEmailOutboxRepository, EmailOutboxRepository>();
+builder.Services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
+builder.Services.AddScoped<IEmailSendLogRepository, EmailSendLogRepository>();
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -62,6 +67,9 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IWeddingInfoService, WeddingInfoService>();
 builder.Services.AddScoped<IRsvpService, RsvpService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
+
+// Email channel
+builder.Services.AddSingleton<IEmailEventChannel, EmailEventChannel>();
 
 // JWT Authentication
 builder.Services.AddAuthentication(options =>
