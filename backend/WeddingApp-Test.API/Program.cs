@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -70,6 +71,28 @@ builder.Services.AddScoped<IGiftService, GiftService>();
 
 // Email channel
 builder.Services.AddSingleton<IEmailEventChannel, EmailEventChannel>();
+
+// Email options
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+var emailOptions = builder.Configuration.GetSection("Email").Get<EmailOptions>() ?? new EmailOptions();
+
+// Registers providers conditionally - order matters: first registered ~ first tried
+if (emailOptions.Resend.Enabled)
+{
+    builder.Services.AddHttpClient("Resend", client =>
+    {
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", emailOptions.Resend.ApiKey);
+        builder.Services.AddSingleton<IEmailProvider, ResendEmailProvider>();
+    });
+}
+
+if (emailOptions.Smtp.Enabled)
+{
+    builder.Services.AddSingleton<IEmailProvider, SmtpEmailProvider>();
+}
+
+builder.Services.AddScoped<IEmailSender, FailoverEmailSender>();
 
 // JWT Authentication
 builder.Services.AddAuthentication(options =>
