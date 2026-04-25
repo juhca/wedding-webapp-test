@@ -92,7 +92,9 @@ if (emailOptions.Smtp.Enabled)
     builder.Services.AddSingleton<IEmailProvider, SmtpEmailProvider>();
 }
 
-builder.Services.AddScoped<IEmailSender, FailoverEmailSender>();
+builder.Services.AddSingleton<IEmailSender, FailoverEmailSender>();
+builder.Services.AddSingleton<ILiquidRenderer, LiquidRenderer>();
+builder.Services.AddScoped<IEmailDispatchService, EmailDispatchService>(); // scoped because it uses scoped repositories
 
 // JWT Authentication
 builder.Services.AddAuthentication(options =>
