@@ -10,8 +10,8 @@ public interface IGiftService
     Task<GiftDto> CreateAsync(CreateGiftDto dto);
     Task<GiftDto> UpdateAsync(Guid id, UpdateGiftDto dto);
     Task DeleteAsync(Guid id);
-    Task<GiftReservationConfirmationDto> ReserveGiftAsync(Guid giftId, Guid userId, ReserveGiftDto dto);
-    Task UnreserveGiftAsync(Guid giftId, Guid userId);
+    Task<GiftReservationConfirmationDto> ReserveGiftAsync(Guid giftId, Guid userId, ReserveGiftDto dto, CancellationToken ct);
+    Task UnreserveGiftAsync(Guid giftId, Guid userId, CancellationToken ct);
     Task<IEnumerable<GiftDto>> GetMyReservedGiftsAsync(Guid userId);
     Task<ImportGiftsResultDto> ImportGiftsAsync(IEnumerable<CreateGiftDto> dtos);
     Task<ImportGiftsResultDto> ImportGiftsCsvAsync(IFormFile file);

@@ -9,6 +9,12 @@ using WeddingApp_Test.Infrastructure.Email;
 
 namespace WeddingApp_Test.API.Tests.BackgroundServices;
 
+/// <summary>
+/// Unit tests for <see cref="EmailOutboxProcessorService"/>.
+/// Verifies retry scheduling, attempt counting, terminal state transitions
+/// (Sent / Failed), and safe handling of missing or already-processed records.
+/// </summary>
+[Trait("Category", "EmailOutboxProcessorService Unit Tests")]
 public class EmailOutboxProcessorServiceTests
 {
     #region Setup

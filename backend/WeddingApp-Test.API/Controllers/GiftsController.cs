@@ -71,13 +71,13 @@ public class GiftsController(IGiftService giftService) : ControllerBase
     [ProducesResponseType(typeof(GiftReservationConfirmationDto), 200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> Reserve(Guid id, [FromBody] ReserveGiftDto dto)
+    public async Task<IActionResult> Reserve(Guid id, [FromBody] ReserveGiftDto dto, CancellationToken ct)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         try
         {
-            var confirmation = await giftService.ReserveGiftAsync(id, userId, dto);
+            var confirmation = await giftService.ReserveGiftAsync(id, userId, dto, ct);
             
             return Ok(confirmation);
         }
@@ -98,13 +98,13 @@ public class GiftsController(IGiftService giftService) : ControllerBase
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> Unreserve(Guid id)
+    public async Task<IActionResult> Unreserve(Guid id, CancellationToken ct)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         try
         {
-            await giftService.UnreserveGiftAsync(id, userId);
+            await giftService.UnreserveGiftAsync(id, userId, ct);
             
             return Ok(new { message = "Gift unreserved successfully" });
         }

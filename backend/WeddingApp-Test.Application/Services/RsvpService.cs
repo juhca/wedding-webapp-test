@@ -1,5 +1,6 @@
 ﻿using WeddingApp_Test.Application.DTO.Rsvp;
 using WeddingApp_Test.Application.Interfaces;
+using WeddingApp_Test.Application.Interfaces.Email;
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Domain.Enums;
 
@@ -9,11 +10,13 @@ public class RsvpService : IRsvpService
 {
     private readonly IRsvpRepository _rsvpRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IEmailDispatchService _emailDispatchService;
 
-    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository)
+    public RsvpService(IRsvpRepository rsvpRepository, IUserRepository userRepository,  IEmailDispatchService emailDispatchService)
     {
         _rsvpRepository = rsvpRepository;
         _userRepository = userRepository;
+        _emailDispatchService = emailDispatchService;
     }
     
     public async Task<RsvpDto?> GetUserRsvpAsync(Guid userId)
@@ -23,7 +26,7 @@ public class RsvpService : IRsvpService
         return rsvp != null ? RsvpDto.FromEntity(rsvp) : null;
     }
 
-    public async Task<RsvpDto> CreateOrUpdateRsvpAsync(Guid userId, CreateRsvpDto dto)
+    public async Task<RsvpDto> CreateOrUpdateRsvpAsync(Guid userId, CreateRsvpDto dto, CancellationToken ct)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user is null)
@@ -94,7 +97,21 @@ public class RsvpService : IRsvpService
             rsvp = existingRsvp;
             _rsvpRepository.Update(rsvp);
         }
-        await _rsvpRepository.SaveChangesAsync(); 
+        await _rsvpRepository.SaveChangesAsync();
+
+        if (!string.IsNullOrWhiteSpace(user.Email))
+        {
+            var isNew = existingRsvp is null; // determine before overwrite if needed
+            var eventName = isNew ? "rsvp.submited" :  "rsvp.updated";
+            var context = new Dictionary<string, object?>
+            {
+                ["Rsvp"] = rsvp,
+                ["RelatedEntityId"] = rsvp.Id
+            };
+            
+            await _emailDispatchService.DispatchEventAsync(eventName, user, context, ct);
+        }
+        
         
         var result = RsvpDto.FromEntity(rsvp);
         result.MaxCompanionsAllowed = maxCompanions;

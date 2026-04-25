@@ -35,12 +35,12 @@ public class RsvpController(IRsvpService rsvpService) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(RsvpDto), 200)]
     [ProducesResponseType(400)]
-    public async Task<IActionResult> CreateOrUpdate([FromBody] CreateRsvpDto dto)
+    public async Task<IActionResult> CreateOrUpdate([FromBody] CreateRsvpDto dto, CancellationToken ct)
     {
         try
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var rsvp = await rsvpService.CreateOrUpdateRsvpAsync(userId, dto);
+            var rsvp = await rsvpService.CreateOrUpdateRsvpAsync(userId, dto, ct);
             
             return Ok(rsvp);
         }

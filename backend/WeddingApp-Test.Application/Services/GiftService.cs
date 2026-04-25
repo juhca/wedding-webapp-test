@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using WeddingApp_Test.Application.DTO.Gift;
 using WeddingApp_Test.Application.Interfaces;
+using WeddingApp_Test.Application.Interfaces.Email;
 using WeddingApp_Test.Domain.Entities;
 
 namespace WeddingApp_Test.Application.Services;
 
-public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository) : IGiftService
+public class GiftService(IGiftRepository giftRepository, IUserRepository userRepository, IEmailDispatchService emailDispatchService) : IGiftService
 {
     public async Task<IEnumerable<GiftDto>> GetAllVisibleAsync(Guid? currentUserId = null)
     {
@@ -93,7 +94,7 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
         await giftRepository.SaveChangesAsync();
     }
 
-    public async Task<GiftReservationConfirmationDto> ReserveGiftAsync(Guid giftId, Guid userId, ReserveGiftDto dto)
+    public async Task<GiftReservationConfirmationDto> ReserveGiftAsync(Guid giftId, Guid userId, ReserveGiftDto dto, CancellationToken ct)
     {
         var gift = await giftRepository.GetByIdWithReservationsAsync(giftId);
 
@@ -138,8 +139,17 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
         // Reload to get updated counts
         gift = await giftRepository.GetByIdWithReservationsAsync(giftId);
         
-        // TODO(TOMAS): send confirmation email
-        // ex.: await _emailService.SendGiftReservationConfirmationAsync(...)
+        // TODO MAKE THE EMAIL REQUIRED
+        if(!string.IsNullOrWhiteSpace(user.Email))
+        {
+            await emailDispatchService.DispatchEventAsync("gift.reserved", user,
+                new Dictionary<string, object?>
+                {
+                    ["Gift"] = gift,
+                    ["Reservation"] = reservation,
+                    ["RelatedEntityId"] = reservation.Id
+                }, ct);
+        }
 
         return new GiftReservationConfirmationDto
         {
@@ -153,8 +163,14 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
         };
     }
 
-    public async Task UnreserveGiftAsync(Guid giftId, Guid userId)
+    public async Task UnreserveGiftAsync(Guid giftId, Guid userId, CancellationToken ct)
     {
+        var user = await userRepository.GetByIdAsync(userId);
+        if (user is null)
+        {
+            throw new InvalidOperationException("User not found");
+        }
+        
         var reservation = await giftRepository.GetUserReservationForGiftAsync(giftId, userId);
         if (reservation is null)
         {
@@ -170,6 +186,16 @@ public class GiftService(IGiftRepository giftRepository, IUserRepository userRep
         }
         
         await giftRepository.SaveChangesAsync();
+
+        if (!string.IsNullOrWhiteSpace(user.Email))
+        {
+            await emailDispatchService.DispatchEventAsync("gift.unreserved", user,
+                new Dictionary<string, object?>
+                {
+                    ["Gift"] = gift,
+                    ["RelatedEntityId"] = giftId
+                }, ct);
+        }
     }
 
     public async Task<IEnumerable<GiftDto>> GetMyReservedGiftsAsync(Guid userId)

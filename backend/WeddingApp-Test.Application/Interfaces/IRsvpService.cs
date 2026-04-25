@@ -5,7 +5,7 @@ namespace WeddingApp_Test.Application.Interfaces;
 public interface IRsvpService
 {
     Task<RsvpDto?> GetUserRsvpAsync(Guid userId);
-    Task<RsvpDto> CreateOrUpdateRsvpAsync(Guid userId, CreateRsvpDto dto);
+    Task<RsvpDto> CreateOrUpdateRsvpAsync(Guid userId, CreateRsvpDto dto, CancellationToken ct);
     Task<RsvpSummaryDto> GetSummaryAsync();
     Task<IEnumerable<RsvpWithUserDto>> GetAllWithUsersAsync();
     Task<IEnumerable<CateringExportDto>> ExportForCateringAsync();

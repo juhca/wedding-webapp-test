@@ -1,4 +1,5 @@
-﻿using WeddingApp_Test.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using WeddingApp_Test.Application.Interfaces;
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Domain.Enums;
 using WeddingApp_Test.Infrastructure.Persistence;
@@ -26,6 +27,9 @@ public static class DataSeeder
         
         // Seed Sample Guests
         SeedSampleGuests(context);
+        
+        // Seed Email templates
+        SeedEmailTemplatesAsync(context);
     }
     
     /// <summary>
@@ -207,5 +211,92 @@ public static class DataSeeder
         {
             Console.WriteLine($"   {guest.FirstName} {guest.LastName} ({guest.Role}) - Code: {guest.AccessCode}");
         }
+    }
+    
+    private static void SeedEmailTemplatesAsync(AppDbContext context)
+    {
+        if (context.EmailTemplates.Any())
+        {
+            return; // already seeded
+        }
+
+        var templates = new List<EmailTemplate>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Name = "RSVP Confirmation",
+                TriggerName = "rsvp.submitted",
+                SubjectTemplate = "Thanks for your RSVP, {{ User.FirstName }}!",
+                HtmlBodyTemplate = """
+                    <h1>Thank you, {{ User.FirstName }}!</h1>
+                    {% if Rsvp.IsAttending %}
+                    <p>We're thrilled you'll be joining us at <strong>{{ Wedding.WeddingName }}</strong>.</p>
+                    {% else %}
+                    <p>We're sorry you can't make it, but thanks for letting us know.</p>
+                    {% endif %}
+                    """,
+                PlainTextBodyTemplate = "Thanks for your RSVP, {{ User.FirstName }}! {% if Rsvp.IsAttending %}We'll see you there.{% else %}Sorry you can't make it.{% endif %}",
+                IsActive = true,
+                MaxSendsPerUser = 1,
+                CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Name = "RSVP Updated",
+                TriggerName = "rsvp.updated",
+                SubjectTemplate = "Your RSVP has been updated, {{ User.FirstName }}",
+                HtmlBodyTemplate = """
+                    <h1>RSVP Updated</h1>
+                    <p>Hi {{ User.FirstName }}, your RSVP for <strong>{{ Wedding.WeddingName }}</strong> has been updated.</p>
+                    {% if Rsvp.IsAttending %}
+                    <p>Status: <strong>Attending</strong></p>
+                    {% else %}
+                    <p>Status: <strong>Not attending</strong></p>
+                    {% endif %}
+                    """,
+                PlainTextBodyTemplate = null,
+                IsActive = true,
+                MaxSendsPerUser = null,
+                CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Gift Reserved",
+                TriggerName = "gift.reserved",
+                SubjectTemplate = "Gift reserved: {{ Gift.Name }}",
+                HtmlBodyTemplate = """
+                    <h1>Thank you, {{ User.FirstName }}!</h1>
+                    <p>You've reserved <strong>{{ Gift.Name }}</strong>.</p>
+                    {% if Gift.PurchaseLink %}
+                    <p><a href="{{ Gift.PurchaseLink }}">Purchase here</a></p>
+                    {% endif %}
+                    """,
+                PlainTextBodyTemplate = null,
+                IsActive = true,
+                MaxSendsPerUser = null,
+                CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Gift Unreserved",
+                TriggerName = "gift.unreserved",
+                SubjectTemplate = "Reservation cancelled: {{ Gift.Name }}",
+                HtmlBodyTemplate = """
+                    <h1>Reservation Cancelled</h1>
+                    <p>Hi {{ User.FirstName }}, your reservation for <strong>{{ Gift.Name }}</strong> has been cancelled.</p>
+                    """,
+                PlainTextBodyTemplate = null,
+                IsActive = true,
+                MaxSendsPerUser = null,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.EmailTemplates.AddRange(templates);
+        context.SaveChanges();
     }
 }
