@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WeddingApp_Test.API.Tests.Fakes;
+using WeddingApp_Test.Application.Interfaces.Email;
 using WeddingApp_Test.Domain.Entities;
 using WeddingApp_Test.Infrastructure.Persistence;
 
@@ -43,6 +45,10 @@ public class WeddingAppWebApplicationFactory : WebApplicationFactory<Program>
                 options.UseInMemoryDatabase(_dbName);
             });
 
+            // Register fake email sender — replaces the real IEmailSender
+            services.AddSingleton<CapturingEmailSender>();
+            services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<CapturingEmailSender>());
+            
             // Build the service provider
             var serviceProvider = services.BuildServiceProvider();
 
