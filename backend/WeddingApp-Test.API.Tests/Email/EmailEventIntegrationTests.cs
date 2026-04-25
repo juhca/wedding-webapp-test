@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WeddingApp_Test.API.Tests.Fakes;
 using WeddingApp_Test.API.Tests.Fixtures;
@@ -7,7 +8,9 @@ using WeddingApp_Test.API.Tests.Helpers;
 using WeddingApp_Test.Application.DTO.Auth;
 using WeddingApp_Test.Application.DTO.Login;
 using WeddingApp_Test.Application.DTO.Rsvp;
+using WeddingApp_Test.Application.Interfaces.Email;
 using WeddingApp_Test.Domain.Entities;
+using WeddingApp_Test.Domain.Enums;
 using WeddingApp_Test.Infrastructure.Persistence;
 
 namespace WeddingApp_Test.API.Tests.Email;
@@ -184,4 +187,69 @@ public class EmailEventIntegrationTests(WeddingAppWebApplicationFactory factory)
         // Assert
         Assert.Single(GetSender().SentEmails);
     }
+
+    /// <summary>
+    /// Full end-to-end test against the live Resend API.
+    /// Submits an RSVP, lets the background processor call Resend, then checks
+    /// the outbox record was marked <see cref="EmailStatus.Sent"/>.
+    /// Skipped automatically when <c>Email:Resend:ApiKey</c> is absent from <c>appsettings.json</c>.
+    /// </summary>
+    // [Fact]
+    // [Trait("Category", "Integration")]
+    // public async Task SubmitRsvp_FullPipeline_ResendAcceptsEmail()
+    // {
+    //     // Skip if no live API key is configured
+    //     var apiKey = new ConfigurationBuilder()
+    //         .SetBasePath(AppContext.BaseDirectory)
+    //         .AddJsonFile("appsettings.json", optional: true)
+    //         .Build()
+    //         .GetValue<string>("Email:Resend:ApiKey");
+    //
+    //     if (string.IsNullOrWhiteSpace(apiKey))
+    //         throw new InvalidOperationException("SKIP: Email:Resend:ApiKey is not configured in appsettings.json.");
+    //
+    //     // Clear shared DB; the derived factory re-seeds WeddingInfo on first use
+    //     await factory.ResetDatabaseAsync();
+    //
+    //     // Strip the CapturingEmailSender override so FailoverEmailSender + ResendEmailProvider are active
+    //     using var resendFactory = factory.WithWebHostBuilder(builder =>
+    //         builder.ConfigureServices(services =>
+    //         {
+    //             var capturing = services.Last(d => d.ServiceType == typeof(IEmailSender));
+    //             services.Remove(capturing);
+    //         }));
+    //
+    //     // CreateClient() triggers the derived factory build, which re-seeds WeddingInfo
+    //     using var resendClient = resendFactory.CreateClient();
+    //
+    //     // Seed test data after the factory is built (shared in-memory DB)
+    //     await SeedTemplateAsync("rsvp.submited");
+    //
+    //     const string accessCode = "RESEND_LIVE_GUEST";
+    //     await SeedDatabase(db =>
+    //     {
+    //         var user = TestDataBuilder.CreateGuestUser(accessCode);
+    //         user.Email = "onboarding@resend.dev"; // safe test recipient for Resend dev accounts
+    //         db.Users.Add(user);
+    //     });
+    //
+    //     // Login and submit RSVP through the Resend-backed factory
+    //     var loginResponse = await resendClient.PostAsJsonAsync("/api/Auth/GuestLogin", new GuestLoginRequest(accessCode));
+    //     loginResponse.EnsureSuccessStatusCode();
+    //     var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+    //
+    //     resendClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult!.Token);
+    //     var rsvpResponse = await resendClient.PostAsJsonAsync("/api/rsvp", new CreateRsvpDto { IsAttending = true });
+    //     rsvpResponse.EnsureSuccessStatusCode();
+    //
+    //     // Give the background processor time to call Resend
+    //     await Task.Delay(1000);
+    //
+    //     // Verify the outbox record was marked Sent by the real provider
+    //     using var scope = resendFactory.Services.CreateScope();
+    //     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    //     var outbox = db.EmailOutbox.FirstOrDefault(o => o.ToEmail == "onboarding@resend.dev");
+    //     Assert.NotNull(outbox);
+    //     Assert.Equal(EmailStatus.Sent, outbox.Status);
+    // }
 }

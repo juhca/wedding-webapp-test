@@ -83,8 +83,8 @@ if (emailOptions.Resend.Enabled)
     {
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", emailOptions.Resend.ApiKey);
-        builder.Services.AddSingleton<IEmailProvider, ResendEmailProvider>();
     });
+    builder.Services.AddSingleton<IEmailProvider, ResendEmailProvider>();
 }
 
 if (emailOptions.Smtp.Enabled)
